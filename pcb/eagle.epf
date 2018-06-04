@@ -1,0 +1,12 @@
+[Eagle]
+Version="07 03 00"
+Platform="Mac OS X"
+Serial="722FEEC08C-LSR-WLM-5CP"
+Globals="Globals"
+Desktop="Desktop"
+
+[Globals]
+AutoSaveProject=1
+
+[Desktop]
+Screen="1280 800"

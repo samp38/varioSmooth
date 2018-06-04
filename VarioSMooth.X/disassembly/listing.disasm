@@ -1,0 +1,2917 @@
+Disassembly Listing for VarioSMooth
+Generated From:
+/Users/sam/Labo/Projects/varioSmooth/VarioSMooth.X/dist/default/production/VarioSMooth.X.production.elf
+Mar 20, 2018 7:51:36 PM
+
+---  /Users/sam/Labo/Projects/varioSmooth/VarioSMooth.X/vario.c  ----------------------------------------
+1:                 #include "pic24_all.h"
+2:                 #include "audio.h"
+3:                 #include "vario.h"
+4:                 #include "audio_response.h"
+5:                 #include "button.h"
+6:                 
+7:                 #define BEEP_DESCENT_PERIOD 500
+8:                 #define SPEED_THRESHOLD 10
+9:                 #define VARIO_SHUTDOWN_IN_SECONDS 180
+10:                #define VARIO_SHUTDOWN_COUNTER_LIMIT ((VARIO_SHUTDOWN_IN_SECONDS * SAMPLE_RATE)/SPEED_REFRESH_PERIOD_IN_SAMPLES_MAX)
+11:                #define VARIO_SHUTDOWN_SPEED_THRESHOLD 2
+12:                #define SPEED_REFRESH_PERIOD_IN_SAMPLES_MAX 8
+13:                #define MEASURE_BUFFER_SIZE 61
+14:                
+15:                s16 shutdown_timeout;
+16:                u32 beep_timeout; // won't switch beeping until counter==0
+17:                u8 update_speed_timeout; // won't recalculate speed until counter==0
+18:                
+19:                u8 beeping;
+20:                
+21:                s32 filtrd_pressures[MEASURE_BUFFER_SIZE];     // Buffer of filtered samples
+22:                s16 filtrd_pressures_i;
+23:                s16 speed_index;
+24:                s16 speed_index_abs;
+25:                
+26:                s16 abval(s16 val) {
+000510  FA0002     LNK #0x2
+000512  780F00     MOV W0, [W14]
+27:                     return (val<0 ? (-val) : val);
+000514  78001E     MOV [W14], W0
+000516  A7F000     BTSC W0, #15
+000518  EA0000     NEG W0, W0
+28:                }
+00051A  FA8000     ULNK
+00051C  060000     RETURN
+29:                
+30:                inline void vario_reset_shutdown_counter(void) {
+00051E  FA0000     LNK #0x0
+31:                    shutdown_timeout = VARIO_SHUTDOWN_COUNTER_LIMIT;
+000520  204650     MOV #0x465, W0
+000522  884000     MOV W0, shutdown_timeout
+32:                }
+000524  FA8000     ULNK
+000526  060000     RETURN
+33:                
+34:                void vario_shutdown_tick(void) {
+000528  FA0000     LNK #0x0
+35:                    shutdown_timeout --;
+00052A  804000     MOV shutdown_timeout, W0
+00052C  E90000     DEC W0, W0
+00052E  884000     MOV W0, shutdown_timeout
+36:                    if (shutdown_timeout == 0) {
+000530  804000     MOV shutdown_timeout, W0
+000532  E00000     CP0 W0
+000534  3A0001     BRA NZ, 0x538
+37:                        shutdown();
+000536  070430     RCALL shutdown
+38:                    }
+39:                }
+000538  FA8000     ULNK
+00053A  060000     RETURN
+40:                
+41:                void vario_init(void) {
+00053C  FA0000     LNK #0x0
+42:                    beeping = 0;
+00053E  EF6807     CLR.B beeping
+43:                    beep_timeout = 200;
+000540  200C80     MOV #0xC8, W0
+000542  200001     MOV #0x0, W1
+000544  884010     MOV W0, beep_timeout
+000546  884021     MOV W1, 0x804
+44:                    update_speed_timeout = 200;
+000548  B3CC80     MOV.B #0xC8, W0
+00054A  B7E806     MOV.B WREG, update_speed_timeout
+45:                
+46:                    filtrd_pressures_i = 0;
+00054C  EF28FC     CLR filtrd_pressures_i
+47:                    speed_index = 0;
+00054E  EF28FE     CLR speed_index
+48:                    speed_index_abs = 0;
+000550  EF2900     CLR speed_index_abs
+49:                
+50:                    vario_reset_shutdown_counter();
+000552  07FFE5     RCALL vario_reset_shutdown_counter
+51:                }
+000554  FA8000     ULNK
+000556  060000     RETURN
+52:                
+53:                void vario_push_filtered(s32 pressureSample) {
+000558  FA0004     LNK #0x4
+00055A  781F88     MOV W8, [W15++]
+00055C  BE8F00     MOV.D W0, [W14]
+54:                    filtrd_pressures_i++;
+00055E  8047E0     MOV filtrd_pressures_i, W0
+000560  E80000     INC W0, W0
+000562  8847E0     MOV W0, filtrd_pressures_i
+55:                    if(filtrd_pressures_i == MEASURE_BUFFER_SIZE) {
+000564  8047E1     MOV filtrd_pressures_i, W1
+000566  2003D0     MOV #0x3D, W0
+000568  508F80     SUB W1, W0, [W15]
+00056A  3A0001     BRA NZ, 0x56E
+56:                        filtrd_pressures_i = 0;
+00056C  EF28FC     CLR filtrd_pressures_i
+57:                    }
+58:                    filtrd_pressures[filtrd_pressures_i] = filterPressure(pressureSample);
+00056E  8047E8     MOV filtrd_pressures_i, W8
+000570  BE001E     MOV.D [W14], W0
+000572  0701CD     RCALL filterPressure
+000574  DE80CF     ASR W0, #15, W1
+000576  DD41C2     SL W8, #2, W3
+000578  208082     MOV #0x808, W2
+00057A  418102     ADD W3, W2, W2
+00057C  BE8900     MOV.D W0, [W2]
+59:                }
+00057E  78044F     MOV [--W15], W8
+000580  FA8000     ULNK
+000582  060000     RETURN
+60:                
+61:                void vario_update_speed_index() {
+000584  FA000A     LNK #0xA
+62:                    u8 integrateTime;
+63:                    
+64:                    if (speed_index < 5) {integrateTime = 50;}
+000586  8047F0     MOV speed_index, W0
+000588  500FE4     SUB W0, #0x4, [W15]
+00058A  3C0003     BRA GT, 0x592
+00058C  B3C320     MOV.B #0x32, W0
+00058E  784F00     MOV.B W0, [W14]
+000590  37000E     BRA 0x5AE
+65:                    else if (speed_index < 10) {integrateTime = 30;}
+000592  8047F0     MOV speed_index, W0
+000594  500FE9     SUB W0, #0x9, [W15]
+000596  3C0003     BRA GT, 0x59E
+000598  B3C1E0     MOV.B #0x1E, W0
+00059A  784F00     MOV.B W0, [W14]
+00059C  370008     BRA 0x5AE
+66:                    else if (speed_index < 30) {integrateTime = 25;}
+00059E  8047F0     MOV speed_index, W0
+0005A0  500FFD     SUB W0, #0x1D, [W15]
+0005A2  3C0003     BRA GT, 0x5AA
+0005A4  B3C190     MOV.B #0x19, W0
+0005A6  784F00     MOV.B W0, [W14]
+0005A8  370002     BRA 0x5AE
+67:                    else {integrateTime = 10;}
+0005AA  B3C0A0     MOV.B #0xA, W0
+0005AC  784F00     MOV.B W0, [W14]
+68:                    
+69:                    s16 i = filtrd_pressures_i - integrateTime;
+0005AE  8047E1     MOV filtrd_pressures_i, W1
+0005B0  FB801E     ZE [W14], W0
+0005B2  508000     SUB W1, W0, W0
+0005B4  980710     MOV W0, [W14+2]
+70:                    if (i < 0) {
+0005B6  90001E     MOV [W14+2], W0
+0005B8  E00000     CP0 W0
+0005BA  3D0003     BRA GE, 0x5C2
+71:                        i += MEASURE_BUFFER_SIZE;
+0005BC  90001E     MOV [W14+2], W0
+0005BE  B003D0     ADD #0x3D, W0
+0005C0  980710     MOV W0, [W14+2]
+72:                    }
+73:                    s16 coef = ((8 * SAMPLE_RATE) / integrateTime);
+0005C2  FB801E     ZE [W14], W0
+0005C4  201901     MOV #0x190, W1
+0005C6  780100     MOV W0, W2
+0005C8  090011     REPEAT #0x11
+0005CA  D80082     DIV.SW W1, W2
+0005CC  980720     MOV W0, [W14+4]
+74:                    s32 speed = (filtrd_pressures[i] - filtrd_pressures[filtrd_pressures_i]) * coef;
+0005CE  90001E     MOV [W14+2], W0
+0005D0  DD00C2     SL W0, #2, W1
+0005D2  208080     MOV #0x808, W0
+0005D4  408000     ADD W1, W0, W0
+0005D6  BE0110     MOV.D [W0], W2
+0005D8  8047E0     MOV filtrd_pressures_i, W0
+0005DA  DD00C2     SL W0, #2, W1
+0005DC  208080     MOV #0x808, W0
+0005DE  408000     ADD W1, W0, W0
+0005E0  BE0010     MOV.D [W0], W0
+0005E2  510100     SUB W2, W0, W2
+0005E4  598181     SUBB W3, W1, W3
+0005E6  90002E     MOV [W14+4], W0
+0005E8  DE80CF     ASR W0, #15, W1
+0005EA  B99A00     MUL.SS W3, W0, W4
+0005EC  780204     MOV W4, W4
+0005EE  B98B02     MUL.SS W1, W2, W6
+0005F0  780286     MOV W6, W5
+0005F2  420205     ADD W4, W5, W4
+0005F4  B81000     MUL.UU W2, W0, W0
+0005F6  420201     ADD W4, W1, W4
+0005F8  780084     MOV W4, W1
+0005FA  980730     MOV W0, [W14+6]
+0005FC  980741     MOV W1, [W14+8]
+0005FE  980730     MOV W0, [W14+6]
+000600  980741     MOV W1, [W14+8]
+75:                    
+76:                    speed_index = (speedIIRFilter(speed) - SPEED_THRESHOLD)/SPEED_STEP;
+000602  90003E     MOV [W14+6], W0
+000604  9000CE     MOV [W14+8], W1
+000606  07021D     RCALL speedIIRFilter
+000608  5000EA     SUB W0, #0xA, W1
+00060A  200090     MOV #0x9, W0
+00060C  780100     MOV W0, W2
+00060E  090011     REPEAT #0x11
+000610  D80082     DIV.SW W1, W2
+000612  8847F0     MOV W0, speed_index
+77:                    speed_index_abs = abval(speed_index);
+000614  8047F0     MOV speed_index, W0
+000616  07FF7C     RCALL abval
+000618  884800     MOV W0, speed_index_abs
+78:                }
+00061A  FA8000     ULNK
+00061C  060000     RETURN
+79:                
+80:                /**
+81:                 * Toggle beeping with new speed value
+82:                 */
+83:                void vario_beep_tick() {
+00061E  FA0008     LNK #0x8
+84:                    u32 beep_period;
+85:                    u32 beep_freq;
+86:                    
+87:                    if (speed_index < 0) {
+000620  8047F0     MOV speed_index, W0
+000622  E00000     CP0 W0
+000624  3D0007     BRA GE, 0x634
+88:                        beep_freq = 0;
+000626  B80060     MUL.UU W0, #0, W0
+000628  980720     MOV W0, [W14+4]
+00062A  980731     MOV W1, [W14+6]
+89:                        beep_period = BEEP_DESCENT_PERIOD;
+00062C  201F40     MOV #0x1F4, W0
+00062E  200001     MOV #0x0, W1
+000630  BE8F00     MOV.D W0, [W14]
+000632  370017     BRA 0x662
+90:                    }
+91:                    else {
+92:                        if (speed_index_abs > SPEED_INDEX_MAX) {
+000634  804801     MOV speed_index_abs, W1
+000636  200630     MOV #0x63, W0
+000638  508F80     SUB W1, W0, [W15]
+00063A  340004     BRA LE, 0x644
+93:                            speed_index = SPEED_INDEX_MAX;
+00063C  200630     MOV #0x63, W0
+00063E  8847F0     MOV W0, speed_index
+94:                            speed_index_abs = SPEED_INDEX_MAX;
+000640  200630     MOV #0x63, W0
+000642  884800     MOV W0, speed_index_abs
+95:                        }
+96:                        beep_period = beepLen[speed_index_abs];
+000644  804800     MOV speed_index_abs, W0
+000646  400080     ADD W0, W0, W1
+000648  283800     MOV #0x8380, W0
+00064A  408000     ADD W1, W0, W0
+00064C  780010     MOV [W0], W0
+00064E  EB0080     CLR W1
+000650  BE8F00     MOV.D W0, [W14]
+97:                        beep_freq = audioFreq[speed_index];
+000652  8047F0     MOV speed_index, W0
+000654  400080     ADD W0, W0, W1
+000656  284480     MOV #0x8448, W0
+000658  408000     ADD W1, W0, W0
+00065A  780010     MOV [W0], W0
+00065C  EB0080     CLR W1
+00065E  980720     MOV W0, [W14+4]
+000660  980731     MOV W1, [W14+6]
+98:                    //  LP_Order = speedLowPassOrder[abval(speedIndex_current)];
+99:                    }
+100:                   // audio freuqnecy response : from 220 to 2200
+101:                   // Beep Period response : from 500 to 50
+102:               
+103:                   if (beeping){
+000662  BFC807     MOV.B beeping, WREG
+000664  E00400     CP0.B W0
+000666  320016     BRA Z, 0x694
+104:                       audio_Beep(0);
+000668  B80060     MUL.UU W0, #0, W0
+00066A  07024B     RCALL audio_Beep
+105:                       beep_timeout =  (( beep_period * SAMPLE_RATE) / 15000 );
+00066C  90009E     MOV [W14+2], W1
+00066E  200320     MOV #0x32, W0
+000670  B98800     MUL.SS W1, W0, W0
+000672  780100     MOV W0, W2
+000674  78001E     MOV [W14], W0
+000676  B90060     MUL.SU W0, #0, W0
+000678  780000     MOV W0, W0
+00067A  410100     ADD W2, W0, W2
+00067C  78009E     MOV [W14], W1
+00067E  200320     MOV #0x32, W0
+000680  B80800     MUL.UU W1, W0, W0
+000682  410101     ADD W2, W1, W2
+000684  780082     MOV W2, W1
+000686  23A982     MOV #0x3A98, W2
+000688  200003     MOV #0x0, W3
+00068A  07FE1F     RCALL 0x2CA
+00068C  884010     MOV W0, beep_timeout
+00068E  884021     MOV W1, 0x804
+106:                       beeping = 0;
+000690  EF6807     CLR.B beeping
+000692  37001C     BRA 0x6CC
+107:                   } else {
+108:                       audio_Beep((beep_freq * 2) / 3);
+000694  90002E     MOV [W14+4], W0
+000696  9000BE     MOV [W14+6], W1
+000698  400000     ADD W0, W0, W0
+00069A  488081     ADDC W1, W1, W1
+00069C  200032     MOV #0x3, W2
+00069E  200003     MOV #0x0, W3
+0006A0  07FE14     RCALL 0x2CA
+0006A2  07022F     RCALL audio_Beep
+109:                       beeping = 1;
+0006A4  B3C010     MOV.B #0x1, W0
+0006A6  B7E807     MOV.B WREG, beeping
+110:                       beep_timeout = ((beep_period * SAMPLE_RATE) / 10000);
+0006A8  90009E     MOV [W14+2], W1
+0006AA  200320     MOV #0x32, W0
+0006AC  B98800     MUL.SS W1, W0, W0
+0006AE  780100     MOV W0, W2
+0006B0  78001E     MOV [W14], W0
+0006B2  B90060     MUL.SU W0, #0, W0
+0006B4  780000     MOV W0, W0
+0006B6  410100     ADD W2, W0, W2
+0006B8  78009E     MOV [W14], W1
+0006BA  200320     MOV #0x32, W0
+0006BC  B80800     MUL.UU W1, W0, W0
+0006BE  410101     ADD W2, W1, W2
+0006C0  780082     MOV W2, W1
+0006C2  227102     MOV #0x2710, W2
+0006C4  200003     MOV #0x0, W3
+0006C6  07FE01     RCALL 0x2CA
+0006C8  884010     MOV W0, beep_timeout
+0006CA  884021     MOV W1, 0x804
+111:                   }
+112:               }
+0006CC  FA8000     ULNK
+0006CE  060000     RETURN
+113:               
+114:               
+115:               void vario_ping(s32 pressureSample) {
+0006D0  FA0004     LNK #0x4
+0006D2  BE8F00     MOV.D W0, [W14]
+116:               
+117:                   vario_push_filtered(pressureSample);
+0006D4  BE001E     MOV.D [W14], W0
+0006D6  07FF40     RCALL vario_push_filtered
+118:                   
+119:                   if (update_speed_timeout-- == 0) {
+0006D8  BFC806     MOV.B update_speed_timeout, WREG
+0006DA  FB8080     ZE W0, W1
+0006DC  E90081     DEC W1, W1
+0006DE  DE08CF     LSR W1, #15, W1
+0006E0  784081     MOV.B W1, W1
+0006E2  E94000     DEC.B W0, W0
+0006E4  B7E806     MOV.B WREG, update_speed_timeout
+0006E6  E00401     CP0.B W1
+0006E8  320010     BRA Z, 0x70A
+120:                       vario_update_speed_index();
+0006EA  07FF4C     RCALL vario_update_speed_index
+121:               
+122:                       if (speed_index_abs < 50) {
+0006EC  804801     MOV speed_index_abs, W1
+0006EE  200310     MOV #0x31, W0
+0006F0  508F80     SUB W1, W0, [W15]
+0006F2  3C0003     BRA GT, 0x6FA
+123:                           update_speed_timeout = 8;
+0006F4  B3C080     MOV.B #0x8, W0
+0006F6  B7E806     MOV.B WREG, update_speed_timeout
+0006F8  370002     BRA 0x6FE
+124:                       } else {
+125:                           update_speed_timeout = 5;
+0006FA  B3C050     MOV.B #0x5, W0
+0006FC  B7E806     MOV.B WREG, update_speed_timeout
+126:                       }
+127:                       
+128:                       if(speed_index_abs > VARIO_SHUTDOWN_SPEED_THRESHOLD) {
+0006FE  804800     MOV speed_index_abs, W0
+000700  500FE2     SUB W0, #0x2, [W15]
+000702  340002     BRA LE, 0x708
+129:                           vario_reset_shutdown_counter();
+000704  07FF0C     RCALL vario_reset_shutdown_counter
+000706  370001     BRA 0x70A
+130:                       } else {
+131:                           vario_shutdown_tick();
+000708  07FF0F     RCALL vario_shutdown_tick
+132:                       }
+133:                   }
+134:               
+135:                   if (beep_timeout-- == 0) {
+00070A  804010     MOV beep_timeout, W0
+00070C  804021     MOV 0x804, W1
+00070E  708100     IOR W1, W0, W2
+000710  A7F002     BTSC W2, #15
+000712  EA0102     NEG W2, W2
+000714  E90102     DEC W2, W2
+000716  DE114F     LSR W2, #15, W2
+000718  784102     MOV.B W2, W2
+00071A  500061     SUB W0, #0x1, W0
+00071C  5880E0     SUBB W1, #0x0, W1
+00071E  884010     MOV W0, beep_timeout
+000720  884021     MOV W1, 0x804
+000722  E00402     CP0.B W2
+000724  320001     BRA Z, 0x728
+136:                       vario_beep_tick();
+000726  07FF7B     RCALL vario_beep_tick
+137:                   }
+138:               }
+000728  FA8000     ULNK
+00072A  060000     RETURN
+---  /Users/sam/Labo/Projects/varioSmooth/VarioSMooth.X/uart.c  -----------------------------------------
+1:                 #include "pic24_all.h"
+2:                 
+3:                 void uart_Config(void) {
+0010E2  FA0002     LNK #0x2
+4:                     char tmp;
+5:                     U2BRG  = 6;     // 8928baud @ FCY = 250kHz, note that you must select "custom baud rate" in the
+0010E4  200060     MOV #0x6, W0
+0010E6  8811C0     MOV W0, U2BRG
+6:                                    // pickit2 uart application drop-down window for baudrate, and enter the value 8928 
+7:                     U2MODEbits.BRGH = 1;
+0010E8  A86230     BSET U2MODE, #3
+8:                     U2MODEbits.UARTEN = 1;
+0010EA  A8E231     BSET 0x231, #7
+9:                     U2MODEbits.RTSMD = 1; // no flow control
+0010EC  A86231     BSET 0x231, #3
+10:                    U2MODEbits.PDSEL = 0; // 8 bits, no parity
+0010EE  801180     MOV U2MODE, W0
+0010F0  A11000     BCLR W0, #1
+0010F2  A12000     BCLR W0, #2
+0010F4  881180     MOV W0, U2MODE
+11:                    U2MODEbits.STSEL = 0; // 1 stop bit
+0010F6  A90230     BCLR U2MODE, #0
+12:                    while(U2STAbits.URXDA == 1) {
+0010F8  370002     BRA 0x10FE
+0010FE  801190     MOV U2STA, W0
+001100  600061     AND W0, #0x1, W0
+001102  E00000     CP0 W0
+001104  3AFFFA     BRA NZ, 0x10FA
+13:                        tmp = U2RXREG;
+0010FA  8011B0     MOV U2RXREG, W0
+0010FC  784F00     MOV.B W0, [W14]
+14:                    }
+15:                    // clear IF flags
+16:                    IFS1bits.U2RXIF = 0;
+001106  A9C087     BCLR 0x87, #6
+17:                    IFS1bits.U2TXIF = 0;
+001108  A9E087     BCLR 0x87, #7
+18:                    // set priority
+19:                    IPC7bits.U2RXIP = 1;
+00110A  800590     MOV IPC7, W0
+00110C  A08000     BSET W0, #8
+00110E  A19000     BCLR W0, #9
+001110  A1A000     BCLR W0, #10
+001112  880590     MOV W0, IPC7
+20:                    IPC7bits.U2TXIP = 1;
+001114  800590     MOV IPC7, W0
+001116  A0C000     BSET W0, #12
+001118  A1D000     BCLR W0, #13
+00111A  A1E000     BCLR W0, #14
+00111C  880590     MOV W0, IPC7
+21:                    // disable interrupt
+22:                    IEC1bits.U2RXIE = 0;
+00111E  A9C097     BCLR 0x97, #6
+23:                    IEC1bits.U2TXIE = 0;
+001120  A9E097     BCLR 0x97, #7
+24:                    // enable transmit
+25:                    U2STAbits.UTXEN = 1;
+001122  A84233     BSET 0x233, #2
+26:                }
+001124  FA8000     ULNK
+001126  060000     RETURN
+27:                
+28:                void uart_Print(char *szBuf) {
+001128  FA0002     LNK #0x2
+00112A  780F00     MOV W0, [W14]
+29:                    while(*szBuf) {
+00112C  37000B     BRA 0x1144
+001144  78001E     MOV [W14], W0
+001146  784010     MOV.B [W0], W0
+001148  E00400     CP0.B W0
+00114A  3AFFF1     BRA NZ, 0x112E
+30:                        U2TXREG = *szBuf++;   // transfer data byte to TX reg
+00112E  78001E     MOV [W14], W0
+001130  784010     MOV.B [W0], W0
+001132  FB0000     SE W0, W0
+001134  8811A0     MOV W0, U2TXREG
+001136  E80F1E     INC [W14], [W14]
+31:                        while(!U2STAbits.TRMT);  // wait for xmit to complete
+001138  000000     NOP
+00113A  801191     MOV U2STA, W1
+00113C  201000     MOV #0x100, W0
+00113E  608000     AND W1, W0, W0
+001140  E00000     CP0 W0
+001142  32FFFB     BRA Z, 0x113A
+32:                    }
+33:                }
+00114C  FA8000     ULNK
+00114E  060000     RETURN
+---  /Users/sam/Labo/Projects/varioSmooth/VarioSMooth.X/timers.c  ---------------------------------------
+1:                 #include "pic24_all.h"
+2:                 
+3:                 // implemented in user code
+4:                 void tmr1_callback(void);
+5:                 void tmr3_callback(void);
+6:                 
+7:                 void tmr1_Config(void) {
+000FBE  FA0000     LNK #0x0
+8:                     T1CONbits.TON = 0;    // turn off the timer
+000FC0  A9E105     BCLR 0x105, #7
+9:                     T1CONbits.TCS = 0;    // select internal clock
+000FC2  A92104     BCLR T1CON, #1
+10:                    T1CONbits.TGATE = 0;  // gate disabled
+000FC4  A9C104     BCLR T1CON, #6
+11:                    T1CONbits.TSIDL = 0;  // continue in idle mode
+000FC6  A9A105     BCLR 0x105, #5
+12:                    T1CONbits.TCKPS1 = 0; // Prescaler 1:8
+000FC8  A9A104     BCLR T1CON, #5
+13:                    T1CONbits.TCKPS0 = 1; // Prescaler 1:8
+000FCA  A88104     BSET T1CON, #4
+14:                    PR1 = 65535;
+000FCC  EB8000     SETM W0
+000FCE  880810     MOV W0, PR1
+15:                    TMR1  = 0;            //clear timer1 value
+000FD0  EF2100     CLR TMR1
+16:                    _T1IF = 0;            //clear interrupt flag
+000FD2  A96084     BCLR IFS0, #3
+17:                    _T1IP = 1;            //choose a priority
+000FD4  800520     MOV IPC0, W0
+000FD6  A0C000     BSET W0, #12
+000FD8  A1D000     BCLR W0, #13
+000FDA  A1E000     BCLR W0, #14
+000FDC  880520     MOV W0, IPC0
+18:                    _T1IE = 0;            //disable the interrupt
+000FDE  A96094     BCLR IEC0, #3
+19:                }
+000FE0  FA8000     ULNK
+000FE2  060000     RETURN
+20:                
+21:                void tmr1_Start(u32 uSx100) {
+000FE4  FA0004     LNK #0x4
+000FE6  BE8F00     MOV.D W0, [W14]
+22:                    T1CONbits.TON = 0; //turn off the timer
+000FE8  A9E105     BCLR 0x105, #7
+23:                
+24:                    PR1  = (u16)(((uSx100 * FCY)/10000L)>>3); // timer period
+000FEA  90009E     MOV [W14+2], W1
+000FEC  2D0900     MOV #0xD090, W0
+000FEE  B98800     MUL.SS W1, W0, W0
+000FF0  780100     MOV W0, W2
+000FF2  78001E     MOV [W14], W0
+000FF4  B90063     MUL.SU W0, #3, W0
+000FF6  780000     MOV W0, W0
+000FF8  410100     ADD W2, W0, W2
+000FFA  78009E     MOV [W14], W1
+000FFC  2D0900     MOV #0xD090, W0
+000FFE  B80800     MUL.UU W1, W0, W0
+001000  410101     ADD W2, W1, W2
+001002  780082     MOV W2, W1
+001004  227102     MOV #0x2710, W2
+001006  200003     MOV #0x0, W3
+001008  07F960     RCALL 0x2CA
+00100A  DD094D     SL W1, #13, W2
+00100C  DE0043     LSR W0, #3, W0
+00100E  710000     IOR W2, W0, W0
+001010  DE08C3     LSR W1, #3, W1
+001012  780000     MOV W0, W0
+001014  880810     MOV W0, PR1
+25:                    TMR1 = 0; // reset counter
+001016  EF2100     CLR TMR1
+26:                
+27:                    T1CONbits.TON = 1;    //turn on the timer
+001018  A8E105     BSET 0x105, #7
+28:                    _T1IE = 1;            //enable the interrupt
+00101A  A86094     BSET IEC0, #3
+29:                }
+00101C  FA8000     ULNK
+00101E  060000     RETURN
+30:                
+31:                void tmr1_Stop(void) {
+001020  FA0000     LNK #0x0
+32:                    T1CONbits.TON = 0;
+001022  A9E105     BCLR 0x105, #7
+33:                    TMR1 = 0;
+001024  EF2100     CLR TMR1
+34:                    _T1IE = 0;            //disable the interrupt
+001026  A96094     BCLR IEC0, #3
+35:                }
+001028  FA8000     ULNK
+00102A  060000     RETURN
+36:                
+37:                void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void) {
+00102C  F80036     PUSH RCOUNT
+00102E  BE9F80     MOV.D W0, [W15++]
+001030  BE9F82     MOV.D W2, [W15++]
+001032  BE9F84     MOV.D W4, [W15++]
+001034  BE9F86     MOV.D W6, [W15++]
+001036  FA0000     LNK #0x0
+38:                    _T1IF = 0; //clear the timer interrupt bit
+001038  A96084     BCLR IFS0, #3
+39:                    tmr1_callback();
+00103A  07FE1B     RCALL tmr1_callback
+40:                }
+00103C  FA8000     ULNK
+00103E  BE034F     MOV.D [--W15], W6
+001040  BE024F     MOV.D [--W15], W4
+001042  BE014F     MOV.D [--W15], W2
+001044  BE004F     MOV.D [--W15], W0
+001046  F90036     POP RCOUNT
+001048  064000     RETFIE
+41:                
+42:                void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void) {
+00104A  F80036     PUSH RCOUNT
+00104C  BE9F80     MOV.D W0, [W15++]
+00104E  BE9F82     MOV.D W2, [W15++]
+001050  BE9F84     MOV.D W4, [W15++]
+001052  BE9F86     MOV.D W6, [W15++]
+001054  FA0000     LNK #0x0
+43:                    _T3IF = 0; //clear the timer interrupt bit
+001056  A90085     BCLR 0x85, #0
+44:                    tmr3_callback();
+001058  07FEE0     RCALL tmr3_callback
+45:                }
+00105A  FA8000     ULNK
+00105C  BE034F     MOV.D [--W15], W6
+00105E  BE024F     MOV.D [--W15], W4
+001060  BE014F     MOV.D [--W15], W2
+001062  BE004F     MOV.D [--W15], W0
+001064  F90036     POP RCOUNT
+001066  064000     RETFIE
+46:                
+47:                // Timer 2 used for generating audio tone square wave
+48:                void tmr2_Config(void) {
+001068  FA0000     LNK #0x0
+49:                    T2CONbits.T32 = 0; // 16bit timer
+00106A  A96110     BCLR T2CON, #3
+50:                    T2CONbits.TCS = 0; //  select internal clock
+00106C  A92110     BCLR T2CON, #1
+51:                    T2CONbits.TGATE = 0; // gate disabled
+00106E  A9C110     BCLR T2CON, #6
+52:                    T2CONbits.TSIDL = 0; // continue in idle mode
+001070  A9A111     BCLR 0x111, #5
+53:                    T2CONbits.TCKPS1 = 0; // Prescaler 1:8
+001072  A9A110     BCLR T2CON, #5
+54:                    T2CONbits.TCKPS0 = 1; // Prescaler 1:8
+001074  A88110     BSET T2CON, #4
+55:                    _T2IP = 1;   //choose a priority
+001076  800530     MOV IPC1, W0
+001078  A0C000     BSET W0, #12
+00107A  A1D000     BCLR W0, #13
+00107C  A1E000     BCLR W0, #14
+00107E  880530     MOV W0, IPC1
+56:                    T2CONbits.TON = 0; // stop tmr2
+001080  A9E111     BCLR 0x111, #7
+57:                    TMR2 = 0;
+001082  EF2106     CLR TMR2
+58:                    _T2IE = 0; // disable the interrupt
+001084  A9E094     BCLR IEC0, #7
+59:                }
+001086  FA8000     ULNK
+001088  060000     RETURN
+60:                
+61:                void tmr2_Start(u16 ticks){
+00108A  FA0002     LNK #0x2
+00108C  780F00     MOV W0, [W14]
+62:                    PR2 = ticks;
+00108E  78009E     MOV [W14], W1
+001090  880861     MOV W1, PR2
+63:                    T2CONbits.TON = 1;
+001092  A8E111     BSET 0x111, #7
+64:                }
+001094  FA8000     ULNK
+001096  060000     RETURN
+65:                
+66:                void tmr2_Stop(void) {
+001098  FA0000     LNK #0x0
+67:                    T2CONbits.TON = 0;
+00109A  A9E111     BCLR 0x111, #7
+68:                    TMR2 = 0;
+00109C  EF2106     CLR TMR2
+69:                }
+00109E  FA8000     ULNK
+0010A0  060000     RETURN
+70:                
+71:                // Timer 3 used for periodic measures
+72:                void tmr3_Config(void) {
+0010A2  FA0000     LNK #0x0
+73:                    T2CONbits.T32 = 0; // 16bit timer
+0010A4  A96110     BCLR T2CON, #3
+74:                    T3CONbits.TCS = 0; //  select internal clock
+0010A6  A92112     BCLR T3CON, #1
+75:                    T3CONbits.TGATE = 0; // gate disabled
+0010A8  A9C112     BCLR T3CON, #6
+76:                    T3CONbits.TSIDL = 0; // continue in idle mode
+0010AA  A9A113     BCLR 0x113, #5
+77:                    T3CONbits.TCKPS1 = 1; // Prescaler 1:256
+0010AC  A8A112     BSET T3CON, #5
+78:                    T3CONbits.TCKPS0 = 1; // Prescaler 1:256
+0010AE  A88112     BSET T3CON, #4
+79:                    _T3IP = 1;   //choose a priority
+0010B0  800540     MOV IPC2, W0
+0010B2  A00000     BSET W0, #0
+0010B4  A11000     BCLR W0, #1
+0010B6  A12000     BCLR W0, #2
+0010B8  880540     MOV W0, IPC2
+80:                    T3CONbits.TON = 0; // stop tmr3
+0010BA  A9E113     BCLR 0x113, #7
+81:                    TMR3 = 0;
+0010BC  EF210A     CLR TMR3
+82:                    _T3IE = 0; // disable the interrupt
+0010BE  A90095     BCLR 0x95, #0
+83:                }
+0010C0  FA8000     ULNK
+0010C2  060000     RETURN
+84:                
+85:                void tmr3_Start(void){
+0010C4  FA0000     LNK #0x0
+86:                    T3CONbits.TON = 0; //turn off the timer
+0010C6  A9E113     BCLR 0x113, #7
+87:                    TMR3 = 0; // reset counter
+0010C8  EF210A     CLR TMR3
+88:                    T3CONbits.TON = 1; //turn on the timer
+0010CA  A8E113     BSET 0x113, #7
+89:                }
+0010CC  FA8000     ULNK
+0010CE  060000     RETURN
+90:                
+91:                inline unsigned int tmr3_Get(void) {
+0010D0  FA0000     LNK #0x0
+92:                    return TMR3;
+0010D2  800850     MOV TMR3, W0
+93:                }
+0010D4  FA8000     ULNK
+0010D6  060000     RETURN
+94:                
+95:                void tmr3_Stop(void) {
+0010D8  FA0000     LNK #0x0
+96:                    T3CONbits.TON = 0;
+0010DA  A9E113     BCLR 0x113, #7
+97:                    TMR3 = 0;
+0010DC  EF210A     CLR TMR3
+98:                }
+0010DE  FA8000     ULNK
+0010E0  060000     RETURN
+99:                
+---  /Users/sam/Labo/Projects/varioSmooth/VarioSMooth.X/sensor.c  ---------------------------------------
+1:                 #include "pic24_all.h"
+2:                 #include "i2c.h"
+3:                 
+4:                 #define I2C_ID_MS5611    ((u8)0b11101110)
+5:                 #define I2C_ID_MS5611_RST ((u8) 0x1E)
+6:                 u8 I2C_ID_MS5607_C[7] = {0, 0b10100010, 0b10100100, 0b10100110, 0b10101000, 0b10101010, 0b10101100 };
+7:                 #define I2C_ID_MS5611_CONVERT_PRESSURE_4096 ((u8)0x48)
+8:                 #define I2C_ID_MS5611_CONVERT_TEMP_4096     ((u8)0x52)
+9:                 #define I2C_ID_MS5611_READ_ADC              ((u8)0x00)
+10:                
+11:                
+12:                // MS5611 calibration coefficients
+13:                u16 COEFS[7];
+14:                
+15:                s32 dT = 68;
+16:                // D2 typical value : 8077736
+17:                void sns_CompensateTemperature(u32 D2)	{
+00072C  FA0004     LNK #0x4
+00072E  BE8F00     MOV.D W0, [W14]
+18:                    // Difference between actual and reference temperature
+19:                    dT = D2 - ((u32)COEFS[5] << 8); // dT easily goes up to 250000     C5*256 = 8 256 000
+000730  804D00     MOV 0x9A0, W0
+000732  B80161     MUL.UU W0, #1, W2
+000734  DD1848     SL W3, #8, W0
+000736  DE10C8     LSR W2, #8, W1
+000738  700081     IOR W0, W1, W1
+00073A  DD1048     SL W2, #8, W0
+00073C  10013E     SUBR W0, [W14++], W2
+00073E  1881AE     SUBBR W1, [W14--], W3
+000740  BE0002     MOV.D W2, W0
+000742  884D60     MOV W0, 0x9AC
+000744  884D71     MOV W1, 0x9AE
+20:                    // Actual temperature (-40 unsigned long 85°C with 0.01°C resolution)
+21:                //    s32 TEMP = 2000 + ((dT * (s64)COEFS[6]) >> 23);
+22:                }
+000746  FA8000     ULNK
+000748  060000     RETURN
+23:                
+24:                s32 sns_CompensatePressure(u32 D1)  {
+00074A  FA0028     LNK #0x28
+00074C  BE9F88     MOV.D W8, [W15++]
+00074E  BE9F8A     MOV.D W10, [W15++]
+000750  980F20     MOV W0, [W14+20]
+000752  980F31     MOV W1, [W14+22]
+25:                //    sprintf(dbg, "%lu\t", D1);
+26:                //    uart_Print(dbg);
+27:                //    sprintf(dbg, "%ld\t", dT);
+28:                //    uart_Print(dbg);
+29:                    // Offset at actual temperature
+30:                    s64 OFF = ((s64)COEFS[2] << 16) + (((s64)COEFS[4] * dT) >> 7);
+000754  804CD0     MOV 0x99A, W0
+000756  EB0080     CLR W1
+000758  B81160     MUL.UU W2, #0, W2
+00075A  BE0502     MOV.D W2, W10
+00075C  BE0400     MOV.D W0, W8
+00075E  78058A     MOV W10, W11
+000760  780509     MOV W9, W10
+000762  780488     MOV W8, W9
+000764  EB0400     CLR W8
+000766  804CF0     MOV 0x99E, W0
+000768  B80261     MUL.UU W0, #1, W4
+00076A  B83360     MUL.UU W6, #0, W6
+00076C  980F44     MOV W4, [W14+24]
+00076E  980F55     MOV W5, [W14+26]
+000770  980F66     MOV W6, [W14+28]
+000772  980F77     MOV W7, [W14+30]
+000774  804D60     MOV 0x9AC, W0
+000776  804D71     MOV 0x9AE, W1
+000778  DE894F     ASR W1, #15, W2
+00077A  780182     MOV W2, W3
+00077C  BE0302     MOV.D W2, W6
+00077E  BE0200     MOV.D W0, W4
+000780  90084E     MOV [W14+24], W0
+000782  9008DE     MOV [W14+26], W1
+000784  90096E     MOV [W14+28], W2
+000786  9009FE     MOV [W14+30], W3
+000788  07FDB0     RCALL 0x2EA
+00078A  DE0047     LSR W0, #7, W0
+00078C  DD0AC9     SL W1, #9, W5
+00078E  728000     IOR W5, W0, W0
+000790  DE08C7     LSR W1, #7, W1
+000792  DD12C9     SL W2, #9, W5
+000794  728081     IOR W5, W1, W1
+000796  DE1147     LSR W2, #7, W2
+000798  DD1AC9     SL W3, #9, W5
+00079A  728102     IOR W5, W2, W2
+00079C  DE99C7     ASR W3, #7, W3
+00079E  441F00     ADD W8, W0, [W14++]
+0007A0  4C9F01     ADDC W9, W1, [W14++]
+0007A2  4D1F02     ADDC W10, W2, [W14++]
+0007A4  4D8F03     ADDC W11, W3, [W14]
+0007A6  B1006E     SUB #0x6, W14
+31:                //    sprintf(dbg, "%lld\t", OFF);
+32:                //    uart_Print(dbg);
+33:                    
+34:                    // Sensitivity at actual temperature
+35:                    s64 SENS = ((s64)COEFS[1] << 15) + (((s64)COEFS[3] * dT) >> 8);
+0007A8  804CC0     MOV 0x998, W0
+0007AA  EB0080     CLR W1
+0007AC  B81160     MUL.UU W2, #0, W2
+0007AE  BE0502     MOV.D W2, W10
+0007B0  BE0400     MOV.D W0, W8
+0007B2  DD5DCF     SL W11, #15, W11
+0007B4  DE5341     LSR W10, #1, W6
+0007B6  73058B     IOR W6, W11, W11
+0007B8  DD554F     SL W10, #15, W10
+0007BA  DE4B41     LSR W9, #1, W6
+0007BC  73050A     IOR W6, W10, W10
+0007BE  DD4CCF     SL W9, #15, W9
+0007C0  DE4341     LSR W8, #1, W6
+0007C2  730489     IOR W6, W9, W9
+0007C4  DD444F     SL W8, #15, W8
+0007C6  804CE0     MOV 0x99C, W0
+0007C8  B80261     MUL.UU W0, #1, W4
+0007CA  B83360     MUL.UU W6, #0, W6
+0007CC  981704     MOV W4, [W14+32]
+0007CE  981715     MOV W5, [W14+34]
+0007D0  981726     MOV W6, [W14+36]
+0007D2  981737     MOV W7, [W14+38]
+0007D4  804D60     MOV 0x9AC, W0
+0007D6  804D71     MOV 0x9AE, W1
+0007D8  DE894F     ASR W1, #15, W2
+0007DA  780182     MOV W2, W3
+0007DC  BE0302     MOV.D W2, W6
+0007DE  BE0200     MOV.D W0, W4
+0007E0  90100E     MOV [W14+32], W0
+0007E2  90109E     MOV [W14+34], W1
+0007E4  90112E     MOV [W14+36], W2
+0007E6  9011BE     MOV [W14+38], W3
+0007E8  07FD80     RCALL 0x2EA
+0007EA  DE0048     LSR W0, #8, W0
+0007EC  DD0AC8     SL W1, #8, W5
+0007EE  728000     IOR W5, W0, W0
+0007F0  DE08C8     LSR W1, #8, W1
+0007F2  DD12C8     SL W2, #8, W5
+0007F4  728081     IOR W5, W1, W1
+0007F6  DE1148     LSR W2, #8, W2
+0007F8  DD1AC8     SL W3, #8, W5
+0007FA  728102     IOR W5, W2, W2
+0007FC  DE99C8     ASR W3, #8, W3
+0007FE  440000     ADD W8, W0, W0
+000800  4C8081     ADDC W9, W1, W1
+000802  4D0102     ADDC W10, W2, W2
+000804  4D8183     ADDC W11, W3, W3
+000806  980740     MOV W0, [W14+8]
+000808  980751     MOV W1, [W14+10]
+00080A  980762     MOV W2, [W14+12]
+00080C  980773     MOV W3, [W14+14]
+36:                //    sprintf(dbg, "%lld\t", SENS);
+37:                //    uart_Print(dbg);
+38:                    // Temperature compensated pressure (10 to 1200mbar with 0.01mbar resolution)
+39:                    s32 P = (((D1 * SENS) >> 21 ) - OFF) >> 15;
+00080E  90082E     MOV [W14+20], W0
+000810  9008BE     MOV [W14+22], W1
+000812  B81160     MUL.UU W2, #0, W2
+000814  90024E     MOV [W14+8], W4
+000816  9002DE     MOV [W14+10], W5
+000818  90036E     MOV [W14+12], W6
+00081A  9003FE     MOV [W14+14], W7
+00081C  07FD66     RCALL 0x2EA
+00081E  BE0302     MOV.D W2, W6
+000820  BE0200     MOV.D W0, W4
+000822  DE2A45     LSR W5, #5, W4
+000824  DD344B     SL W6, #11, W8
+000826  740204     IOR W8, W4, W4
+000828  DE32C5     LSR W6, #5, W5
+00082A  DD3C4B     SL W7, #11, W8
+00082C  740285     IOR W8, W5, W5
+00082E  DEBB45     ASR W7, #5, W6
+000830  DEBBCF     ASR W7, #15, W7
+000832  52003E     SUB W4, [W14++], W0
+000834  5A80BE     SUBB W5, [W14++], W1
+000836  5B013E     SUBB W6, [W14++], W2
+000838  5B819E     SUBB W7, [W14], W3
+00083A  B1006E     SUB #0x6, W14
+00083C  DE004F     LSR W0, #15, W0
+00083E  DD0A41     SL W1, #1, W4
+000840  720000     IOR W4, W0, W0
+000842  DE08CF     LSR W1, #15, W1
+000844  DD1241     SL W2, #1, W4
+000846  720081     IOR W4, W1, W1
+000848  980F00     MOV W0, [W14+16]
+00084A  980F11     MOV W1, [W14+18]
+40:                    
+41:                    return P;
+00084C  90080E     MOV [W14+16], W0
+00084E  90089E     MOV [W14+18], W1
+42:                }
+000850  BE054F     MOV.D [--W15], W10
+000852  BE044F     MOV.D [--W15], W8
+000854  FA8000     ULNK
+000856  060000     RETURN
+43:                
+44:                // Trigger a Pressure measurement and conversion
+45:                void sns_TriggerPressureSample(void) {
+000858  FA0000     LNK #0x0
+46:                    i2c_Write1(I2C_ID_MS5611,I2C_ID_MS5611_CONVERT_PRESSURE_4096);
+00085A  B3C481     MOV.B #0x48, W1
+00085C  B3CEE0     MOV.B #0xEE, W0
+00085E  070385     RCALL i2c_Write1
+47:                }
+000860  FA8000     ULNK
+000862  060000     RETURN
+48:                
+49:                // Trigger a Temperature measurement and conversion
+50:                void sns_TriggerTemperatureSample(void) {
+000864  FA0000     LNK #0x0
+51:                    i2c_Write1(I2C_ID_MS5611,I2C_ID_MS5611_CONVERT_TEMP_4096);
+000866  B3C521     MOV.B #0x52, W1
+000868  B3CEE0     MOV.B #0xEE, W0
+00086A  07037F     RCALL i2c_Write1
+52:                }
+00086C  FA8000     ULNK
+00086E  060000     RETURN
+53:                
+54:                // Read the result of the conversion (temperature or pressure)
+55:                void sns_ReadADC(u32 * value) {
+000870  FA0006     LNK #0x6
+000872  980720     MOV W0, [W14+4]
+56:                    u8 temp[3];
+57:                    i2c_RcvBuf(I2C_ID_MS5611,I2C_ID_MS5611_READ_ADC,3,temp);
+000874  78018E     MOV W14, W3
+000876  200032     MOV #0x3, W2
+000878  EB4080     CLR.B W1
+00087A  B3CEE0     MOV.B #0xEE, W0
+00087C  070391     RCALL i2c_RcvBuf
+58:                
+59:                    Nop();
+00087E  000000     NOP
+60:                    Nop();
+000880  000000     NOP
+61:                    Nop();
+000882  000000     NOP
+62:                    
+63:                    *value = 0X00000000 | temp[0];
+000884  78401E     MOV.B [W14], W0
+000886  FB8000     ZE W0, W0
+000888  EB0080     CLR W1
+00088A  90012E     MOV [W14+4], W2
+00088C  BE8900     MOV.D W0, [W2]
+64:                    *value = *value << 8 | temp[1];
+00088E  90002E     MOV [W14+4], W0
+000890  BE0010     MOV.D [W0], W0
+000892  DD0948     SL W1, #8, W2
+000894  DE01C8     LSR W0, #8, W3
+000896  710183     IOR W2, W3, W3
+000898  DD0148     SL W0, #8, W2
+00089A  90401E     MOV.B [W14+1], W0
+00089C  FB8000     ZE W0, W0
+00089E  EB0080     CLR W1
+0008A0  710000     IOR W2, W0, W0
+0008A2  718081     IOR W3, W1, W1
+0008A4  90012E     MOV [W14+4], W2
+0008A6  BE8900     MOV.D W0, [W2]
+65:                    *value = *value << 8| temp[2];
+0008A8  90002E     MOV [W14+4], W0
+0008AA  BE0010     MOV.D [W0], W0
+0008AC  DD0948     SL W1, #8, W2
+0008AE  DE01C8     LSR W0, #8, W3
+0008B0  710183     IOR W2, W3, W3
+0008B2  DD0148     SL W0, #8, W2
+0008B4  90402E     MOV.B [W14+2], W0
+0008B6  FB8000     ZE W0, W0
+0008B8  EB0080     CLR W1
+0008BA  710000     IOR W2, W0, W0
+0008BC  718081     IOR W3, W1, W1
+0008BE  90012E     MOV [W14+4], W2
+0008C0  BE8900     MOV.D W0, [W2]
+66:                }
+0008C2  FA8000     ULNK
+0008C4  060000     RETURN
+67:                
+68:                // Reset the sensor : load the calibration coefficients into the memory
+69:                void sns_Reset(void) {
+0008C6  FA0000     LNK #0x0
+70:                    i2c_Write1(I2C_ID_MS5611, I2C_ID_MS5611_RST);
+0008C8  B3C1E1     MOV.B #0x1E, W1
+0008CA  B3CEE0     MOV.B #0xEE, W0
+0008CC  07034E     RCALL i2c_Write1
+71:                }
+0008CE  FA8000     ULNK
+0008D0  060000     RETURN
+72:                
+73:                /**
+74:                 * call sns_Reset, wait, then call this
+75:                 * Read the calibration coefficient for the calculations
+76:                 */
+77:                void sns_Config(void) {
+0008D2  FA0004     LNK #0x4
+78:                    u8 b[2];
+79:                
+80:                    int i = 1;
+0008D4  200010     MOV #0x1, W0
+0008D6  780F00     MOV W0, [W14]
+81:                    for (; i <= 6; i++) {
+0008D8  370015     BRA 0x904
+000902  E80F1E     INC [W14], [W14]
+000904  78001E     MOV [W14], W0
+000906  500FE6     SUB W0, #0x6, [W15]
+000908  34FFE8     BRA LE, 0x8DA
+82:                        i2c_RcvBuf(I2C_ID_MS5611, I2C_ID_MS5607_C[i], 2, b);
+0008DA  209A40     MOV #0x9A4, W0
+0008DC  40001E     ADD W0, [W14], W0
+0008DE  784010     MOV.B [W0], W0
+0008E0  E8808E     INC2 W14, W1
+0008E2  780181     MOV W1, W3
+0008E4  200022     MOV #0x2, W2
+0008E6  784080     MOV.B W0, W1
+0008E8  B3CEE0     MOV.B #0xEE, W0
+0008EA  07035A     RCALL i2c_RcvBuf
+83:                        COEFS[i] = ((u16) b[0] << 8) | (u16)b[1];
+0008EC  90402E     MOV.B [W14+2], W0
+0008EE  FB8000     ZE W0, W0
+0008F0  DD00C8     SL W0, #8, W1
+0008F2  90403E     MOV.B [W14+3], W0
+0008F4  FB8000     ZE W0, W0
+0008F6  700081     IOR W0, W1, W1
+0008F8  78001E     MOV [W14], W0
+0008FA  400100     ADD W0, W0, W2
+0008FC  209960     MOV #0x996, W0
+0008FE  410000     ADD W2, W0, W0
+000900  780801     MOV W1, [W0]
+84:                    }
+85:                }
+00090A  FA8000     ULNK
+00090C  060000     RETURN
+---  /Users/sam/Labo/Projects/varioSmooth/VarioSMooth.X/pic24f16ka101_ports.h  --------------------------
+1:                 #define ENABLE_RA0_PULLUP() _CN2PUE = 1
+2:                 #define DISABLE_RA0_PULLUP() _CN2PUE = 0
+3:                 #define ENABLE_RA1_PULLUP() _CN3PUE = 1
+4:                 #define DISABLE_RA1_PULLUP() _CN3PUE = 0
+5:                 #define ENABLE_RA2_PULLUP() _CN30PUE = 1
+6:                 #define DISABLE_RA2_PULLUP() _CN30PUE = 0
+7:                 #define ENABLE_RA3_PULLUP() _CN29PUE = 1
+8:                 #define DISABLE_RA3_PULLUP() _CN29PUE = 0
+9:                 #define ENABLE_RA4_PULLUP() _CN0PUE = 1
+10:                #define DISABLE_RA4_PULLUP() _CN0PUE = 0
+11:                
+12:                #define ENABLE_RA6_PULLUP() _CN8PUE = 1
+13:                #define DISABLE_RA6_PULLUP() _CN8PUE = 0
+14:                
+15:                #define ENABLE_RB0_PULLUP() _CN4PUE = 1
+16:                #define DISABLE_RB0_PULLUP() _CN4PUE = 0
+17:                #define ENABLE_RB1_PULLUP() _CN5PUE = 1
+18:                #define DISABLE_RB1_PULLUP() _CN5PUE = 0
+19:                
+20:                #define ENABLE_RB2_PULLUP() _CN6PUE = 1
+21:                #define DISABLE_RB2_PULLUP() _CN6PUE = 0
+22:                
+23:                #define ENABLE_RB4_PULLUP() _CN1PUE = 1
+24:                #define DISABLE_RB4_PULLUP() _CN1PUE = 0
+25:                #define ENABLE_RB7_PULLUP() _CN23PUE = 1
+26:                #define DISABLE_RB7_PULLUP() _CN23PUE = 0
+27:                #define ENABLE_RB8_PULLUP() _CN22PUE = 1
+28:                #define DISABLE_RB8_PULLUP() _CN22PUE = 0
+29:                #define ENABLE_RB9_PULLUP() _CN21PUE = 1
+30:                #define DISABLE_RB9_PULLUP() _CN21PUE = 0
+31:                
+32:                #define ENABLE_RB12_PULLUP() _CN14PUE = 1
+33:                #define DISABLE_RB12_PULLUP() _CN14PUE = 0
+34:                #define ENABLE_RB13_PULLUP() _CN13PUE = 1
+35:                #define DISABLE_RB13_PULLUP() _CN13PUE = 0
+36:                
+37:                #define ENABLE_RB14_PULLUP() _CN12PUE = 1
+38:                #define DISABLE_RB14_PULLUP() _CN12PUE = 0
+39:                #define ENABLE_RB15_PULLUP() _CN11PUE = 1
+40:                #define DISABLE_RB15_PULLUP() _CN11PUE = 0
+41:                
+42:                #define ENABLE_RA0_CN_INTERRUPT() _CN2IE = 1
+43:                #define DISABLE_RA0_CN_INTERRUPT() _CN2IE = 0
+44:                #define ENABLE_RA1_CN_INTERRUPT() _CN3IE = 1
+45:                #define DISABLE_RA1_CN_INTERRUPT() _CN3IE = 0
+46:                #define ENABLE_RA2_CN_INTERRUPT() _CN30IE = 1
+47:                #define DISABLE_RA2_CN_INTERRUPT() _CN30IE = 0
+48:                #define ENABLE_RA3_CN_INTERRUPT() _CN29IE = 1
+49:                #define DISABLE_RA3_CN_INTERRUPT() _CN29IE = 0
+50:                #define ENABLE_RA4_CN_INTERRUPT() _CN0IE = 1
+51:                #define DISABLE_RA4_CN_INTERRUPT() _CN0IE = 0
+52:                #define ENABLE_RB0_CN_INTERRUPT() _CN4IE = 1
+53:                #define DISABLE_RB0_CN_INTERRUPT() _CN4IE = 0
+54:                #define ENABLE_RB1_CN_INTERRUPT() _CN5IE = 1
+55:                #define DISABLE_RB1_CN_INTERRUPT() _CN5IE = 0
+56:                #define ENABLE_RB4_CN_INTERRUPT() _CN1IE = 1
+57:                #define DISABLE_RB4_CN_INTERRUPT() _CN1IE = 0
+58:                #define ENABLE_RB7_CN_INTERRUPT() _CN23IE = 1
+59:                #define DISABLE_RB7_CN_INTERRUPT() _CN23IE = 0
+60:                #define ENABLE_RB8_CN_INTERRUPT() _CN22IE = 1
+61:                #define DISABLE_RB8_CN_INTERRUPT() _CN22IE = 0
+62:                #define ENABLE_RB9_CN_INTERRUPT() _CN21IE = 1
+63:                #define DISABLE_RB9_CN_INTERRUPT() _CN21IE = 0
+64:                #define ENABLE_RB14_CN_INTERRUPT() _CN12IE = 1
+65:                #define DISABLE_RB14_CN_INTERRUPT() _CN12IE = 0
+66:                #define ENABLE_RB15_CN_INTERRUPT() _CN11IE = 1
+67:                #define DISABLE_RB15_CN_INTERRUPT() _CN11IE = 0
+68:                
+69:                #define DISABLE_RA0_ANALOG() _PCFG0 = 1
+70:                #define ENABLE_RA0_ANALOG() _PCFG0 = 0
+71:                #define DISABLE_RA1_ANALOG() _PCFG1 = 1
+72:                #define ENABLE_RA1_ANALOG() _PCFG1 = 0
+73:                #define DISABLE_RA2_ANALOG() _PCFG4 = 1
+74:                #define ENABLE_RA2_ANALOG() _PCFG4 = 0
+75:                #define DISABLE_RA3_ANALOG() _PCFG5 = 1
+76:                #define ENABLE_RA3_ANALOG() _PCFG5 = 0
+77:                
+78:                #define DISABLE_RB0_ANALOG() _PCFG2 = 1
+79:                #define ENABLE_RB0_ANALOG() _PCFG2 = 0
+80:                #define DISABLE_RB1_ANALOG() _PCFG3 = 1
+81:                #define ENABLE_RB1_ANALOG() _PCFG3 = 0
+82:                
+83:                #define DISABLE_RB12_ANALOG() _PCFG12 = 1
+84:                #define ENABLE_RB12_ANALOG() _PCFG12 = 0
+85:                #define DISABLE_RB13_ANALOG() _PCFG11 = 1
+86:                #define ENABLE_RB13_ANALOG() _PCFG11 = 0
+87:                
+88:                #define DISABLE_RB14_ANALOG() _PCFG10 = 1
+89:                #define ENABLE_RB14_ANALOG() _PCFG10 = 0
+90:                
+91:                #define ENABLE_RA0_OPENDRAIN() _ODA0 = 1
+92:                #define DISABLE_RA0_OPENDRAIN() _ODA0 = 0
+93:                #define ENABLE_RA1_OPENDRAIN() _ODA1 = 1
+94:                #define DISABLE_RA1_OPENDRAIN() _ODA1 = 0
+95:                #define ENABLE_RA2_OPENDRAIN() _ODA2 = 1
+96:                #define DISABLE_RA2_OPENDRAIN() _ODA2 = 0
+97:                #define ENABLE_RA3_OPENDRAIN() _ODA3 = 1
+98:                #define DISABLE_RA3_OPENDRAIN() _ODA3 = 0
+99:                #define ENABLE_RA4_OPENDRAIN() _ODA4 = 1
+100:               #define DISABLE_RA4_OPENDRAIN() _ODA4 = 0
+101:               #define ENABLE_RA6_OPENDRAIN() _ODA6 = 1
+102:               #define DISABLE_RA6_OPENDRAIN() _ODA6 = 0
+103:               
+104:               #define ENABLE_RB0_OPENDRAIN() _ODB0 = 1
+105:               #define DISABLE_RB0_OPENDRAIN() _ODB0 = 0
+106:               #define ENABLE_RB1_OPENDRAIN() _ODB1 = 1
+107:               #define DISABLE_RB1_OPENDRAIN() _ODB1 = 0
+108:               #define ENABLE_RB2_OPENDRAIN() _ODB2 = 1
+109:               #define DISABLE_RB2_OPENDRAIN() _ODB2 = 0
+110:               #define ENABLE_RB4_OPENDRAIN() _ODB4 = 1
+111:               #define DISABLE_RB4_OPENDRAIN() _ODB4 = 0
+112:               #define ENABLE_RB7_OPENDRAIN() _ODB7 = 1
+113:               #define DISABLE_RB7_OPENDRAIN() _ODB7 = 0
+114:               #define ENABLE_RB8_OPENDRAIN() _ODB8 = 1
+115:               #define DISABLE_RB8_OPENDRAIN() _ODB8 = 0
+116:               #define ENABLE_RB9_OPENDRAIN() _ODB9 = 1
+117:               #define DISABLE_RB9_OPENDRAIN() _ODB9 = 0
+118:               #define ENABLE_RB12_OPENDRAIN() _ODB12 = 1
+119:               #define DISABLE_RB12_OPENDRAIN() _ODB12 = 0
+120:               #define ENABLE_RB13_OPENDRAIN() _ODB13 = 1
+121:               #define DISABLE_RB13_OPENDRAIN() _ODB13 = 0
+122:               #define ENABLE_RB14_OPENDRAIN() _ODB14 = 1
+123:               #define DISABLE_RB14_OPENDRAIN() _ODB14 = 0
+124:               #define ENABLE_RB15_OPENDRAIN() _ODB15 = 1
+125:               #define DISABLE_RB15_OPENDRAIN() _ODB15 = 0
+126:               
+127:               static inline void CONFIG_RA0_AS_DIG_OUTPUT(){
+128:                DISABLE_RA0_PULLUP();
+129:                DISABLE_RA0_OPENDRAIN();
+130:                _TRISA0 = 0;
+131:                _PCFG0 = 1;
+132:               }
+133:               static inline void CONFIG_RA1_AS_DIG_OUTPUT(){
+134:                DISABLE_RA1_PULLUP();
+135:                DISABLE_RA1_OPENDRAIN();
+136:                _TRISA1 = 0;
+137:                _PCFG1 = 1;
+138:               }
+139:               static inline void CONFIG_RA2_AS_DIG_OUTPUT(){
+140:                DISABLE_RA2_PULLUP();
+141:                DISABLE_RA2_OPENDRAIN();
+142:                _TRISA2 = 0;
+143:                _PCFG4 = 1;
+144:               }
+145:               static inline void CONFIG_RA3_AS_DIG_OUTPUT(){
+146:                DISABLE_RA3_PULLUP();
+147:                DISABLE_RA3_OPENDRAIN();
+148:                _TRISA3 = 0;
+149:                _PCFG5 = 1;
+150:               }
+151:               static inline void CONFIG_RA4_AS_DIG_OUTPUT(){
+152:                DISABLE_RA4_PULLUP();
+153:                DISABLE_RA4_OPENDRAIN();
+154:                _TRISA4 = 0;
+155:               }
+156:               static inline void CONFIG_RA6_AS_DIG_OUTPUT(){
+000C0A  FA0000     LNK #0x0
+157:                DISABLE_RA6_PULLUP();
+000C0C  A90069     BCLR 0x69, #0
+158:                DISABLE_RA6_OPENDRAIN();
+000C0E  A9C2C6     BCLR ODCA, #6
+159:                _TRISA6 = 0;
+000C10  A9C2C0     BCLR TRISA, #6
+160:               }static inline void CONFIG_RB0_AS_DIG_OUTPUT(){
+000C12  FA8000     ULNK
+000C14  060000     RETURN
+161:                DISABLE_RB0_PULLUP();
+162:                DISABLE_RB0_OPENDRAIN();
+163:                _TRISB0 = 0;
+164:                _PCFG2 = 1;
+165:               }
+166:               static inline void CONFIG_RB1_AS_DIG_OUTPUT(){
+167:                DISABLE_RB1_PULLUP();
+168:                DISABLE_RB1_OPENDRAIN();
+169:                _TRISB1 = 0;
+170:                _PCFG3 = 1;
+171:               }
+172:               static inline void CONFIG_RB2_AS_DIG_OUTPUT(){
+173:                DISABLE_RB2_PULLUP();
+174:                DISABLE_RB2_OPENDRAIN();
+175:                _TRISB2 = 0;
+176:                }
+177:               static inline void CONFIG_RB4_AS_DIG_OUTPUT(){
+178:                DISABLE_RB4_PULLUP();
+179:                DISABLE_RB4_OPENDRAIN();
+180:                _TRISB4 = 0;
+181:               }
+182:               static inline void CONFIG_RB7_AS_DIG_OUTPUT(){
+183:                DISABLE_RB7_PULLUP();
+184:                DISABLE_RB7_OPENDRAIN();
+185:                _TRISB7 = 0;
+186:               }
+187:               static inline void CONFIG_RB8_AS_DIG_OUTPUT(){
+188:                DISABLE_RB8_PULLUP();
+189:                DISABLE_RB8_OPENDRAIN();
+190:                _TRISB8 = 0;
+191:               }
+192:               static inline void CONFIG_RB9_AS_DIG_OUTPUT(){
+193:                DISABLE_RB9_PULLUP();
+194:                DISABLE_RB9_OPENDRAIN();
+195:                _TRISB9 = 0;
+196:               }
+197:               static inline void CONFIG_RB12_AS_DIG_OUTPUT(){
+198:                DISABLE_RB12_PULLUP();
+199:                DISABLE_RB12_OPENDRAIN();
+200:                _TRISB12 = 0;
+201:                _PCFG12 = 1;
+202:               }
+203:               static inline void CONFIG_RB13_AS_DIG_OUTPUT(){
+204:                DISABLE_RB13_PULLUP();
+205:                DISABLE_RB13_OPENDRAIN();
+206:                _TRISB13 = 0;
+207:                _PCFG11 = 1;
+208:               }
+209:               static inline void CONFIG_RB14_AS_DIG_OUTPUT(){
+000AA0  FA0000     LNK #0x0
+210:                DISABLE_RB14_PULLUP();
+000AA2  A98069     BCLR 0x69, #4
+211:                DISABLE_RB14_OPENDRAIN();
+000AA4  A9C2CF     BCLR 0x2CF, #6
+212:                _TRISB14 = 0;
+000AA6  A9C2C9     BCLR 0x2C9, #6
+213:                _PCFG10 = 1;
+000AA8  A8432D     BSET 0x32D, #2
+214:               }
+000AAA  FA8000     ULNK
+000AAC  060000     RETURN
+215:               static inline void CONFIG_RB15_AS_DIG_OUTPUT(){
+216:                DISABLE_RB15_PULLUP();
+217:                DISABLE_RB15_OPENDRAIN();
+218:                _TRISB15 = 0;
+219:               }
+220:               static inline void CONFIG_RA0_AS_DIG_OD_OUTPUT(){
+221:                DISABLE_RA0_PULLUP();
+222:                ENABLE_RA0_OPENDRAIN();
+223:                _TRISA0 = 0;
+224:                _PCFG0 = 1;
+225:               }
+226:               static inline void CONFIG_RA1_AS_DIG_OD_OUTPUT(){
+227:                DISABLE_RA1_PULLUP();
+228:                ENABLE_RA1_OPENDRAIN();
+229:                _TRISA1 = 0;
+230:                _PCFG1 = 1;
+231:               }
+232:               static inline void CONFIG_RA2_AS_DIG_OD_OUTPUT(){
+233:                DISABLE_RA2_PULLUP();
+234:                ENABLE_RA2_OPENDRAIN();
+235:                _TRISA2 = 0;
+236:                _PCFG4 = 1;
+237:               }
+238:               static inline void CONFIG_RA3_AS_DIG_OD_OUTPUT(){
+239:                DISABLE_RA3_PULLUP();
+240:                ENABLE_RA3_OPENDRAIN();
+241:                _TRISA3 = 0;
+242:                _PCFG5 = 1;
+243:               }
+244:               static inline void CONFIG_RA4_AS_DIG_OD_OUTPUT(){
+245:                DISABLE_RA4_PULLUP();
+246:                ENABLE_RA4_OPENDRAIN();
+247:                _TRISA4 = 0;
+248:               }
+249:               static inline void CONFIG_RA6_AS_DIG_OD_OUTPUT(){
+250:                DISABLE_RA6_PULLUP();
+251:                ENABLE_RA6_OPENDRAIN();
+252:                _TRISA6 = 0;
+253:               }
+254:               static inline void CONFIG_RB0_AS_DIG_OD_OUTPUT(){
+255:                DISABLE_RB0_PULLUP();
+256:                ENABLE_RB0_OPENDRAIN();
+257:                _TRISB0 = 0;
+258:                _PCFG2 = 1;
+259:               }
+260:               static inline void CONFIG_RB1_AS_DIG_OD_OUTPUT(){
+261:                DISABLE_RB1_PULLUP();
+262:                ENABLE_RB1_OPENDRAIN();
+263:                _TRISB1 = 0;
+264:                _PCFG3 = 1;
+265:               }
+266:               static inline void CONFIG_RB4_AS_DIG_OD_OUTPUT(){
+267:                DISABLE_RB4_PULLUP();
+268:                ENABLE_RB4_OPENDRAIN();
+269:                _TRISB4 = 0;
+270:               }
+271:               static inline void CONFIG_RB7_AS_DIG_OD_OUTPUT(){
+272:                DISABLE_RB7_PULLUP();
+273:                ENABLE_RB7_OPENDRAIN();
+274:                _TRISB7 = 0;
+275:               }
+276:               static inline void CONFIG_RB8_AS_DIG_OD_OUTPUT(){
+277:                DISABLE_RB8_PULLUP();
+278:                ENABLE_RB8_OPENDRAIN();
+279:                _TRISB8 = 0;
+280:               }
+281:               static inline void CONFIG_RB9_AS_DIG_OD_OUTPUT(){
+282:                DISABLE_RB9_PULLUP();
+283:                ENABLE_RB9_OPENDRAIN();
+284:                _TRISB9 = 0;
+285:               }
+286:               static inline void CONFIG_RB12_AS_DIG_OD_OUTPUT(){
+287:                DISABLE_RB12_PULLUP();
+288:                ENABLE_RB12_OPENDRAIN();
+289:                _TRISB12 = 0;
+290:                _PCFG12 = 1;
+291:               }
+292:               static inline void CONFIG_RB13_AS_DIG_OD_OUTPUT(){
+293:                DISABLE_RB13_PULLUP();
+294:                ENABLE_RB13_OPENDRAIN();
+295:                _TRISB13 = 0;
+296:                _PCFG11 = 1;
+297:               }
+298:               static inline void CONFIG_RB14_AS_DIG_OD_OUTPUT(){
+299:                DISABLE_RB14_PULLUP();
+300:                ENABLE_RB14_OPENDRAIN();
+301:                _TRISB14 = 0;
+302:                _PCFG10 = 1;
+303:               }
+304:               static inline void CONFIG_RB15_AS_DIG_OD_OUTPUT(){
+305:                DISABLE_RB15_PULLUP();
+306:                ENABLE_RB15_OPENDRAIN();
+307:                _TRISB15 = 0;
+308:               }
+309:               static inline void CONFIG_RA0_AS_DIG_INPUT(){
+310:                DISABLE_RA0_PULLUP();
+311:                _TRISA0 = 1;
+312:                _PCFG0 = 1;
+313:               }
+314:               static inline void CONFIG_RA1_AS_DIG_INPUT(){
+315:                DISABLE_RA1_PULLUP();
+316:                _TRISA1 = 1;
+317:                _PCFG1 = 1;
+318:               }
+319:               static inline void CONFIG_RA2_AS_DIG_INPUT(){
+320:                DISABLE_RA2_PULLUP();
+321:                _TRISA2 = 1;
+322:                _PCFG4 = 1;
+323:               }
+324:               static inline void CONFIG_RA3_AS_DIG_INPUT(){
+325:                DISABLE_RA3_PULLUP();
+326:                _TRISA3 = 1;
+327:                _PCFG5 = 1;
+328:               }
+329:               static inline void CONFIG_RA4_AS_DIG_INPUT(){
+000C16  FA0000     LNK #0x0
+330:                DISABLE_RA4_PULLUP();
+000C18  A90068     BCLR CNPU1, #0
+331:                _TRISA4 = 1;
+000C1A  A882C0     BSET TRISA, #4
+332:               }
+000C1C  FA8000     ULNK
+000C1E  060000     RETURN
+333:               static inline void CONFIG_RA6_AS_DIG_INPUT(){
+334:                DISABLE_RA6_PULLUP();
+335:                _TRISA6 = 1;
+336:               }
+337:               static inline void CONFIG_RB0_AS_DIG_INPUT(){
+338:                DISABLE_RB0_PULLUP();
+339:                _TRISB0 = 1;
+340:                _PCFG2 = 1;
+341:               }
+342:               static inline void CONFIG_RB1_AS_DIG_INPUT(){
+343:                DISABLE_RB1_PULLUP();
+344:                _TRISB1 = 1;
+345:                _PCFG3 = 1;
+346:               }
+347:               static inline void CONFIG_RB2_AS_DIG_INPUT(){
+000C20  FA0000     LNK #0x0
+348:                DISABLE_RB2_PULLUP();
+000C22  A9C068     BCLR CNPU1, #6
+349:                _TRISB2 = 1;
+000C24  A842C8     BSET TRISB, #2
+350:               }
+000C26  FA8000     ULNK
+000C28  060000     RETURN
+351:               static inline void CONFIG_RB4_AS_DIG_INPUT(){
+352:                DISABLE_RB4_PULLUP();
+353:                _TRISB4 = 1;
+354:               }
+355:               static inline void CONFIG_RB7_AS_DIG_INPUT(){
+000D4E  FA0000     LNK #0x0
+356:                DISABLE_RB7_PULLUP();
+000D50  A9E06A     BCLR CNPU2, #7
+357:                _TRISB7 = 1;
+000D52  A8E2C8     BSET TRISB, #7
+358:               }
+000D54  FA8000     ULNK
+000D56  060000     RETURN
+359:               static inline void CONFIG_RB8_AS_DIG_INPUT(){
+360:                DISABLE_RB8_PULLUP();
+361:                _TRISB8 = 1;
+362:               }
+363:               static inline void CONFIG_RB9_AS_DIG_INPUT(){
+364:                DISABLE_RB9_PULLUP();
+365:                _TRISB9 = 1;
+366:               }
+367:               static inline void CONFIG_RB12_AS_DIG_INPUT(){
+368:                DISABLE_RB12_PULLUP();
+369:                _TRISB12 = 1;
+370:                _PCFG12 = 1;
+371:               }
+372:               static inline void CONFIG_RB13_AS_DIG_INPUT(){
+373:                DISABLE_RB13_PULLUP();
+374:                _TRISB13 = 1;
+375:                _PCFG11 = 1;
+376:               }
+377:               static inline void CONFIG_RB14_AS_DIG_INPUT(){
+000AAE  FA0000     LNK #0x0
+000C2A  FA0000     LNK #0x0
+000D58  FA0000     LNK #0x0
+378:                DISABLE_RB14_PULLUP();
+000AB0  A98069     BCLR 0x69, #4
+000C2C  A98069     BCLR 0x69, #4
+000D5A  A98069     BCLR 0x69, #4
+379:                _TRISB14 = 1;
+000AB2  A8C2C9     BSET 0x2C9, #6
+000C2E  A8C2C9     BSET 0x2C9, #6
+000D5C  A8C2C9     BSET 0x2C9, #6
+380:                _PCFG10 = 1;
+000AB4  A8432D     BSET 0x32D, #2
+000C30  A8432D     BSET 0x32D, #2
+000D5E  A8432D     BSET 0x32D, #2
+381:               }
+000AB6  FA8000     ULNK
+000AB8  060000     RETURN
+000C32  FA8000     ULNK
+000C34  060000     RETURN
+000D60  FA8000     ULNK
+000D62  060000     RETURN
+382:               static inline void CONFIG_RB15_AS_DIG_INPUT(){
+383:                DISABLE_RB15_PULLUP();
+384:                _TRISB15 = 1;
+385:               }
+386:               
+387:               
+388:               #ifdef _PCFG0
+389:               static inline void CONFIG_AN0_AS_ANALOG(){
+390:                 CONFIG_RA0_AS_DIG_INPUT();
+391:                 _PCFG0 = 0;
+392:               }
+393:               #endif
+394:               #ifdef _PCFG1
+395:               static inline void CONFIG_AN1_AS_ANALOG(){
+396:                 CONFIG_RA1_AS_DIG_INPUT();
+397:                 _PCFG1 = 0;
+398:               }
+399:               #endif
+400:               #ifdef _PCFG2
+401:               static inline void CONFIG_AN2_AS_ANALOG(){
+402:                 CONFIG_RB0_AS_DIG_INPUT();
+403:                 _PCFG2 = 0;
+404:               }
+405:               #endif
+406:               #ifdef _PCFG3
+407:               static inline void CONFIG_AN3_AS_ANALOG(){
+408:                 CONFIG_RB1_AS_DIG_INPUT();
+409:                 _PCFG3 = 0;
+410:               }
+411:               #endif
+412:               #ifdef _PCFG4
+413:               static inline void CONFIG_AN4_AS_ANALOG(){
+414:                 CONFIG_RA2_AS_DIG_INPUT();
+415:                 _PCFG4 = 0;
+416:               }
+417:               #endif
+418:               #ifdef _PCFG5
+419:               static inline void CONFIG_AN5_AS_ANALOG(){
+420:                 CONFIG_RA3_AS_DIG_INPUT();
+421:                 _PCFG5 = 0;
+422:               }
+423:               #endif
+424:               #ifdef _PCFG10
+425:               static inline void CONFIG_AN10_AS_ANALOG(){
+426:                 CONFIG_RB14_AS_DIG_INPUT();
+427:                 _PCFG10 = 0;
+428:               }
+429:               #endif
+430:               #ifdef _PCFG11
+431:               static inline void CONFIG_AN11_AS_ANALOG(){
+432:                 CONFIG_RB13_AS_DIG_INPUT();
+433:                 _PCFG11 = 0;
+434:               }
+435:               #endif
+436:               
+437:               #define _PIC24_DIGIO_DEFINED
+---  /Users/sam/Labo/Projects/varioSmooth/VarioSMooth.X/main.c  -----------------------------------------
+1:                 #include "pic24_all.h"
+2:                 
+3:                 #include "i2c.h"
+4:                 #include "timers.h"
+5:                 #include "sensor.h"
+6:                 #include "audio.h"
+7:                 #include "filters.h"
+8:                 #include "vario.h"
+9:                 #include "button.h"
+10:                
+11:                //#define DEBUG
+12:                #define ELLE_AIME_LA_BITE
+13:                
+14:                #ifdef DEBUG
+15:                    #include <stdio.h>
+16:                    #include "uart.h"
+17:                    char dbgBuf[50];
+18:                #endif
+19:                
+20:                #define NBVALUES 10
+21:                s32 values[NBVALUES];
+22:                u8 values_i = 0;
+23:                
+24:                _FBS( BSS_OFF & BWRP_OFF )
+25:                _FGS( GSS0_OFF & GWRP_OFF )
+26:                _FOSCSEL( FNOSC_LPFRCDIV & IESO_OFF )
+27:                _FOSC( FCKSM_CSECMD & POSCFREQ_100KHZ & OSCIOFNC_ON & POSCMOD_NONE)
+28:                _FWDT( FWDTEN_OFF & WINDIS_OFF & FWPSA_PR128 & WDTPS_PS32768 )
+29:                _FPOR( MCLRE_ON & BORV_1_8V & AI2C1SEL_PRI & PWRTEN_OFF & BOREN_BOR3)
+30:                _FICD( BKBUG_OFF & COE_OFF & ICS_PGx3 )
+31:                _FDS( DSWDTEN_OFF & DSBOR_OFF & RTCCREF_OFF & DSWDTLPRC_OFF & DSWDTPS_DSWDTPS_0 )
+32:                
+33:                
+34:                volatile u8 tmr1_waiting = 0;
+35:                u8 sns_status = 0;
+36:                
+37:                // Raw value of the pressure (coming straight out of the ADC)
+38:                u32 Praw = 0;
+39:                // compensated pressure value
+40:                s32 PressureComp = 0;
+41:                
+42:                #define INTRO_LENGTH 7
+43:                u32 intro_freqs[INTRO_LENGTH] = {440, 0,  698, 0,  659, 0,  587};
+44:                u32 intro_times[INTRO_LENGTH] = {600, 40, 600, 40, 600, 40, 1200};
+45:                
+46:                // Linear Regression
+47:                //void nextFitSpeed(s64 *speed) {
+48:                //    u16 i  = 0; // t index
+49:                //    u16 i_ = 0; // corresponding index in sample in array
+50:                //    u32 X_SUM = 465L;
+51:                //    u32 DENOM = 337L;
+52:                //    u64 XY_SUM = 0LL;
+53:                //    u64 Y_SUM = 0LL;
+54:                //    for(i=0;i<MEASURE_BUFFER_SIZE;i++) {
+55:                //        i_ = i+pressure_count;
+56:                //        if (i_ >= MEASURE_BUFFER_SIZE) {i_ = i+pressure_count - MEASURE_BUFFER_SIZE;}
+57:                //        Y_SUM = Y_SUM + filteredSamplesBuffer[i_];
+58:                //        XY_SUM = XY_SUM + ((i+1) * filteredSamplesBuffer[i_]);
+59:                //    }
+60:                //    *speed = 10 + (((s64)X_SUM * (s64)Y_SUM) - (MEASURE_BUFFER_SIZE * (s64)XY_SUM) ) / ((s64)DENOM);
+61:                //}
+62:                
+63:                void startElapsedTime(void) {
+000C36  FA0000     LNK #0x0
+64:                    tmr1_Start(100000);
+000C38  286A00     MOV #0x86A0, W0
+000C3A  200011     MOV #0x1, W1
+000C3C  0701D3     RCALL tmr1_Start
+65:                    _T1IE = 0;
+000C3E  A96094     BCLR IEC0, #3
+66:                }
+000C40  FA8000     ULNK
+000C42  060000     RETURN
+67:                
+68:                #ifdef DEBUG
+69:                void printElapsedTime(void) {
+70:                    sprintf(dbgBuf, "Elapsed Time = %u ms\r\n", TMR1);
+71:                    tmr1_Stop();
+72:                    uart_Print(dbgBuf);
+73:                    sns_status = 0;
+74:                    sns_TriggerTemperatureSample();
+75:                    tmr1_Start(MEASURE_PERIOD_T);
+76:                }
+77:                #endif
+78:                
+79:                void mcu_Init(void) {
+000C44  FA0000     LNK #0x0
+80:                    AD1PCFG = 0xFFFF;            // set all analog-input enabled pins (ANx) to digital mode
+000C46  EB8000     SETM W0
+000C48  881960     MOV W0, AD1PCFG
+81:                    CLKDIVbits.RCDIV = 0;  	 // LPFRC oscillator 500kHz divided by 1
+000C4A  803A20     MOV CLKDIV, W0
+000C4C  A18000     BCLR W0, #8
+000C4E  A19000     BCLR W0, #9
+000C50  A1A000     BCLR W0, #10
+000C52  883A20     MOV W0, CLKDIV
+82:                    CONFIG_RB2_AS_DIG_INPUT();  // 6 : gpioDbg
+000C54  07FFE5     RCALL CONFIG_RB2_AS_DIG_INPUT
+83:                    CONFIG_RA4_AS_DIG_INPUT();   // DEBUG
+000C56  07FFDF     RCALL CONFIG_RA4_AS_DIG_INPUT
+84:                    CONFIG_RA6_AS_DIG_OUTPUT();  // 14 : Audio output
+000C58  07FFD8     RCALL CONFIG_RA6_AS_DIG_OUTPUT
+85:                //    CONFIG_RB14_AS_DIG_OUTPUT();  // 14 : Comparator output
+86:                    CONFIG_RB14_AS_DIG_INPUT();
+000C5A  07FFE7     RCALL CONFIG_RB14_AS_DIG_INPUT
+87:                
+88:                    _DSSR = 0;      // clear RELEASE bit
+000C5C  A90758     BCLR DSCON, #0
+89:                    _INT0IE = 0;    // only enabled when entering deep sleep mode
+000C5E  A90094     BCLR IEC0, #0
+90:                    _INT0 = 0;      // Clear Deep Sleep on INT0 edge flag
+000C60  A9075B     BCLR 0x75B, #0
+91:                
+92:                    #ifdef DEBUG
+93:                        uart_Config();
+94:                    #endif
+95:                
+96:                    i2c_Config();
+000C62  070112     RCALL i2c_Config
+97:                    tmr1_Config();
+000C64  0701AC     RCALL tmr1_Config
+98:                    tmr2_Config();
+000C66  070200     RCALL tmr2_Config
+99:                    tmr3_Config();
+000C68  07021C     RCALL tmr3_Config
+100:               
+101:                   button_Config();
+000C6A  07007C     RCALL button_Config
+102:                   audio_Config();
+000C6C  07FF26     RCALL audio_Config
+103:               }
+000C6E  FA8000     ULNK
+000C70  060000     RETURN
+104:               
+105:               
+106:               void tmr1_callback(void) {
+000C72  FA0004     LNK #0x4
+107:                   tmr1_Stop();    
+000C74  0701D5     RCALL tmr1_Stop
+108:                   if (tmr1_waiting) {
+000C76  BFC963     MOV.B tmr1_waiting, WREG
+000C78  E00400     CP0.B W0
+000C7A  320002     BRA Z, 0xC80
+109:                       tmr1_waiting = 0;
+000C7C  EF6963     CLR.B tmr1_waiting
+000C7E  370023     BRA 0xCC6
+110:                   } else {
+111:                       ClrWdt();
+000C80  FE6000     CLRWDT
+112:                       _IDLE = 0;
+000C82  A94740     BCLR RCON, #2
+113:                       if (sns_status) {            
+000C84  BFC964     MOV.B sns_status, WREG
+000C86  E00400     CP0.B W0
+000C88  320007     BRA Z, 0xC98
+114:                           ///////////////////////////////////           
+115:                           sns_ReadADC(&Praw);
+000C8A  209660     MOV #0x966, W0
+000C8C  07FDF1     RCALL sns_ReadADC
+116:                           sns_TriggerTemperatureSample();            
+000C8E  07FDEA     RCALL sns_TriggerTemperatureSample
+117:                           /////////////////////////////////// 2ms
+118:                           tmr1_Start(MEASURE_PERIOD_T);
+000C90  2000B0     MOV #0xB, W0
+000C92  200001     MOV #0x0, W1
+000C94  0701A7     RCALL tmr1_Start
+000C96  370010     BRA 0xCB8
+119:                       } else {
+120:                           u32 Traw;
+121:                           sns_ReadADC(&Traw);
+000C98  78000E     MOV W14, W0
+000C9A  07FDEA     RCALL sns_ReadADC
+122:                           sns_TriggerPressureSample();
+000C9C  07FDDD     RCALL sns_TriggerPressureSample
+123:                           tmr1_Start(MEASURE_PERIOD_P);
+000C9E  2005A0     MOV #0x5A, W0
+000CA0  200001     MOV #0x0, W1
+000CA2  0701A0     RCALL tmr1_Start
+124:                           sns_CompensateTemperature(Traw);
+000CA4  BE001E     MOV.D [W14], W0
+000CA6  07FD42     RCALL sns_CompensateTemperature
+125:                           PressureComp = sns_CompensatePressure(Praw);
+000CA8  804B30     MOV Praw, W0
+000CAA  804B41     MOV 0x968, W1
+000CAC  07FD4E     RCALL sns_CompensatePressure
+000CAE  884B50     MOV W0, PressureComp
+000CB0  884B61     MOV W1, 0x96C
+126:                           vario_ping(PressureComp);
+000CB2  804B50     MOV PressureComp, W0
+000CB4  804B61     MOV 0x96C, W1
+000CB6  07FD0C     RCALL vario_ping
+127:                           //sprintf(dbgBuf,"%lu \r\n",PressureComp);
+128:                           //uart_Print(dbgBuf);
+129:                       }
+130:                       sns_status = !sns_status;        
+000CB8  BFC964     MOV.B sns_status, WREG
+000CBA  FB8000     ZE W0, W0
+000CBC  E90000     DEC W0, W0
+000CBE  DE004F     LSR W0, #15, W0
+000CC0  784000     MOV.B W0, W0
+000CC2  B7E964     MOV.B WREG, sns_status
+131:                       Idle();         // Save Power
+000CC4  FE4001     PWRSAV #1
+132:                   }
+133:               }
+000CC6  FA8000     ULNK
+000CC8  060000     RETURN
+134:               
+135:               
+136:               void wait(u32 ms) {
+000CCA  FA0004     LNK #0x4
+000CCC  BE8F00     MOV.D W0, [W14]
+137:                   tmr1_Stop();
+000CCE  0701A8     RCALL tmr1_Stop
+138:                   tmr1_waiting = 1;
+000CD0  B3C010     MOV.B #0x1, W0
+000CD2  B7E963     MOV.B WREG, tmr1_waiting
+139:                   tmr1_Start(10 * ms);
+000CD4  90001E     MOV [W14+2], W0
+000CD6  B9006A     MUL.SU W0, #10, W0
+000CD8  780100     MOV W0, W2
+000CDA  78001E     MOV [W14], W0
+000CDC  B90060     MUL.SU W0, #0, W0
+000CDE  780000     MOV W0, W0
+000CE0  410100     ADD W2, W0, W2
+000CE2  78009E     MOV [W14], W1
+000CE4  2000A0     MOV #0xA, W0
+000CE6  B80800     MUL.UU W1, W0, W0
+000CE8  410101     ADD W2, W1, W2
+000CEA  780082     MOV W2, W1
+000CEC  07017B     RCALL tmr1_Start
+140:               
+141:                   while (tmr1_waiting){
+000CEE  370001     BRA 0xCF2
+000CF2  BFC963     MOV.B tmr1_waiting, WREG
+000CF4  E00400     CP0.B W0
+000CF6  3AFFFC     BRA NZ, 0xCF0
+142:                       Nop();
+000CF0  000000     NOP
+143:                   }
+144:               }
+000CF8  FA8000     ULNK
+000CFA  060000     RETURN
+145:               
+146:               int main(void) {    
+000CFC  FA0002     LNK #0x2
+147:                   mcu_Init();
+000CFE  07FFA2     RCALL mcu_Init
+148:                   ClrWdt();  
+000D00  FE6000     CLRWDT
+149:                   sns_Reset();
+000D02  07FDE1     RCALL sns_Reset
+150:                   wait(2000);
+000D04  207D00     MOV #0x7D0, W0
+000D06  200001     MOV #0x0, W1
+000D08  07FFE0     RCALL wait
+151:                   audio_Beep(0);
+000D0A  B80060     MUL.UU W0, #0, W0
+000D0C  07FEFA     RCALL audio_Beep
+152:                   sns_Config();
+000D0E  07FDE1     RCALL sns_Config
+153:                   sns_status = 0;
+000D10  EF6964     CLR.B sns_status
+154:                   setPreviousVolume();
+000D12  07FF6F     RCALL setPreviousVolume
+155:               #ifdef ELLE_AIME_LA_BITE
+156:                   u8 intro_i;
+157:                   for (intro_i = 0; intro_i < INTRO_LENGTH; intro_i++) {
+000D14  EB4000     CLR.B W0
+000D16  784F00     MOV.B W0, [W14]
+000D18  37000D     BRA 0xD34
+000D32  E84F1E     INC.B [W14], [W14]
+000D34  78401E     MOV.B [W14], W0
+000D36  504FE6     SUB.B W0, #0x6, [W15]
+000D38  36FFF0     BRA LEU, 0xD1A
+158:                       audio_Beep(intro_freqs[intro_i]);
+000D1A  FB801E     ZE [W14], W0
+000D1C  DD00C2     SL W0, #2, W1
+000D1E  209020     MOV #0x902, W0
+000D20  408000     ADD W1, W0, W0
+000D22  BE0010     MOV.D [W0], W0
+000D24  07FEEE     RCALL audio_Beep
+159:                       wait(intro_times[intro_i]);
+000D26  FB801E     ZE [W14], W0
+000D28  DD00C2     SL W0, #2, W1
+000D2A  2091E0     MOV #0x91E, W0
+000D2C  408000     ADD W1, W0, W0
+000D2E  BE0010     MOV.D [W0], W0
+000D30  07FFCC     RCALL wait
+160:                   }
+161:                   audio_Beep(0);
+000D3A  B80060     MUL.UU W0, #0, W0
+000D3C  07FEE2     RCALL audio_Beep
+162:               #else
+163:                   audio_Beep(220);
+164:                   wait(80);
+165:                   audio_Beep(1100);
+166:                   wait(80);
+167:                   audio_Beep(2200);
+168:                   wait(80);
+169:                   audio_Beep(0);
+170:               #endif
+171:                   sns_TriggerTemperatureSample();
+000D3E  07FD92     RCALL sns_TriggerTemperatureSample
+172:                   tmr1_Start(MEASURE_PERIOD_T);
+000D40  2000B0     MOV #0xB, W0
+000D42  200001     MOV #0x0, W1
+000D44  07014F     RCALL tmr1_Start
+173:                   vario_init();
+000D46  07FBFA     RCALL vario_init
+174:                   button_Config();
+000D48  07000D     RCALL button_Config
+175:                   while(1){        
+176:                       Nop();
+000D4A  000000     NOP
+177:                   }
+000D4C  37FFFE     BRA 0xD4A
+178:                   return 0;
+179:               }
+---  /Users/sam/Labo/Projects/varioSmooth/VarioSMooth.X/i2c.c  ------------------------------------------
+1:                 #include "pic24_all.h"
+2:                 
+3:                 #define I2C_ACK 0
+4:                 #define I2C_NAK 1
+5:                 #define I2C_WADDR(x) ((x) & 0xFE) //clear R/W bit of I2C addr
+6:                 #define I2C_RADDR(x) ((x) | 0x01) //set R/W bit of I2C addr
+7:                 
+8:                 void i2c_Config(void) {
+000E88  FA0000     LNK #0x0
+9:                     I2C1BRG = 0;
+000E8A  EF2204     CLR I2C1BRG
+10:                    I2C1CONbits.I2CEN = 1;
+000E8C  A8E207     BSET 0x207, #7
+11:                }
+000E8E  FA8000     ULNK
+000E90  060000     RETURN
+12:                
+13:                void i2c_Start(void) {
+000E92  FA0000     LNK #0x0
+14:                    I2C1CONbits.SEN = 1;   // initiate start
+000E94  A80206     BSET I2C1CON, #0
+15:                    // wait until start finished
+16:                    while (I2C1CONbits.SEN);
+000E96  000000     NOP
+000E98  801030     MOV I2C1CON, W0
+000E9A  600061     AND W0, #0x1, W0
+000E9C  E00000     CP0 W0
+000E9E  3AFFFC     BRA NZ, 0xE98
+17:                }
+000EA0  FA8000     ULNK
+000EA2  060000     RETURN
+18:                
+19:                void i2c_Stop(void) {
+000EA4  FA0000     LNK #0x0
+20:                    I2C1CONbits.PEN=1;     // initiate stop, PEN=1
+000EA6  A84206     BSET I2C1CON, #2
+21:                    //wait until stop finished
+22:                    while (I2C1CONbits.PEN);
+000EA8  000000     NOP
+000EAA  801030     MOV I2C1CON, W0
+000EAC  600064     AND W0, #0x4, W0
+000EAE  E00000     CP0 W0
+000EB0  3AFFFC     BRA NZ, 0xEAA
+23:                }
+000EB2  FA8000     ULNK
+000EB4  060000     RETURN
+24:                
+25:                void i2c_Repeat_Start(void) {
+000EB6  FA0000     LNK #0x0
+26:                    I2C1CONbits.RSEN = 1;   // initiate start
+000EB8  A82206     BSET I2C1CON, #1
+27:                    // wait until restart finished
+28:                    while (I2C1CONbits.RSEN);
+000EBA  000000     NOP
+000EBC  801030     MOV I2C1CON, W0
+000EBE  600062     AND W0, #0x2, W0
+000EC0  E00000     CP0 W0
+000EC2  3AFFFC     BRA NZ, 0xEBC
+29:                }
+000EC4  FA8000     ULNK
+000EC6  060000     RETURN
+30:                
+31:                void i2c_Put(u8 val) {
+000EC8  FA0002     LNK #0x2
+000ECA  784F00     MOV.B W0, [W14]
+32:                    I2C1TRN = val;    // write byte
+000ECC  FB801E     ZE [W14], W0
+000ECE  881010     MOV W0, I2C1TRN
+33:                    while (I2C1STATbits.TRSTAT);   // wait for 8bits+ ack bit to finish
+000ED0  000000     NOP
+000ED2  801041     MOV I2C1STAT, W1
+000ED4  240000     MOV #0x4000, W0
+000ED6  608000     AND W1, W0, W0
+000ED8  E00000     CP0 W0
+000EDA  3AFFFB     BRA NZ, 0xED2
+34:                }
+000EDC  FA8000     ULNK
+000EDE  060000     RETURN
+35:                
+36:                
+37:                u8 i2c_Get(u8 ack2Send) {
+000EE0  FA0004     LNK #0x4
+000EE2  984720     MOV.B W0, [W14+2]
+38:                    u8 inByte;
+39:                    while (I2C1CON & 0x1F);           //wait for idle condition
+000EE4  000000     NOP
+000EE6  801030     MOV I2C1CON, W0
+000EE8  60007F     AND W0, #0x1F, W0
+000EEA  E00000     CP0 W0
+000EEC  3AFFFC     BRA NZ, 0xEE6
+40:                    I2C1CONbits.RCEN = 1;             //enable receive
+000EEE  A86206     BSET I2C1CON, #3
+41:                    while (!I2C1STATbits.RBF);        //wait for receive byte
+000EF0  000000     NOP
+000EF2  801040     MOV I2C1STAT, W0
+000EF4  600062     AND W0, #0x2, W0
+000EF6  E00000     CP0 W0
+000EF8  32FFFC     BRA Z, 0xEF2
+42:                    inByte = I2C1RCV;              //read byte;
+000EFA  801000     MOV I2C1RCV, W0
+000EFC  784F00     MOV.B W0, [W14]
+43:                    //wait for idle condition before attempting ACK
+44:                    while (I2C1CON & 0x1F);           //lower 5 bits must be 0
+000EFE  000000     NOP
+000F00  801030     MOV I2C1CON, W0
+000F02  60007F     AND W0, #0x1F, W0
+000F04  E00000     CP0 W0
+000F06  3AFFFC     BRA NZ, 0xF00
+45:                    I2C1CONbits.ACKDT = ack2Send;  //ACK bit to send back on receive
+000F08  90402E     MOV.B [W14+2], W0
+000F0A  604061     AND.B W0, #0x1, W0
+000F0C  FB8000     ZE W0, W0
+000F0E  600061     AND W0, #0x1, W0
+000F10  DD0045     SL W0, #5, W0
+000F12  801032     MOV I2C1CON, W2
+000F14  2FFDF1     MOV #0xFFDF, W1
+000F16  610081     AND W2, W1, W1
+000F18  700001     IOR W0, W1, W0
+000F1A  881030     MOV W0, I2C1CON
+46:                    I2C1CONbits.ACKEN = 1;            //enable ACKbit transmittion
+000F1C  A88206     BSET I2C1CON, #4
+47:                    while (I2C1CONbits.ACKEN);        //wait for completion
+000F1E  000000     NOP
+000F20  801030     MOV I2C1CON, W0
+000F22  600070     AND W0, #0x10, W0
+000F24  E00000     CP0 W0
+000F26  3AFFFC     BRA NZ, 0xF20
+48:                    return(inByte);                  //return the value
+000F28  78401E     MOV.B [W14], W0
+49:                }
+000F2A  FA8000     ULNK
+000F2C  060000     RETURN
+50:                
+51:                void i2c_ReadN(u8  addr,u8* pdata, u16  cnt) {
+000F2E  FA0008     LNK #0x8
+000F30  984720     MOV.B W0, [W14+2]
+000F32  980721     MOV W1, [W14+4]
+000F34  980732     MOV W2, [W14+6]
+52:                    u16  inx;
+53:                    i2c_Start();
+000F36  07FFAD     RCALL i2c_Start
+54:                    i2c_Put(I2C_RADDR( addr));
+000F38  90402E     MOV.B [W14+2], W0
+000F3A  A00400     BSET.B W0, #0
+000F3C  07FFC5     RCALL i2c_Put
+55:                    for (inx = 0;  inx <  cnt-1;  inx++) {
+000F3E  EB0000     CLR W0
+000F40  780F00     MOV W0, [W14]
+000F42  370008     BRA 0xF54
+000F52  E80F1E     INC [W14], [W14]
+000F54  90003E     MOV [W14+6], W0
+000F56  E90000     DEC W0, W0
+000F58  500F9E     SUB W0, [W14], [W15]
+000F5A  3EFFF4     BRA GTU, 0xF44
+56:                        *pdata++ = i2c_Get(I2C_ACK);
+000F44  EB4000     CLR.B W0
+000F46  07FFCC     RCALL i2c_Get
+000F48  9000AE     MOV [W14+4], W1
+000F4A  784880     MOV.B W0, [W1]
+000F4C  90002E     MOV [W14+4], W0
+000F4E  E80000     INC W0, W0
+000F50  980720     MOV W0, [W14+4]
+57:                    }
+58:                    *pdata = i2c_Get(I2C_NAK);
+000F5C  B3C010     MOV.B #0x1, W0
+000F5E  07FFC0     RCALL i2c_Get
+000F60  9000AE     MOV [W14+4], W1
+000F62  784880     MOV.B W0, [W1]
+59:                    i2c_Stop();
+000F64  07FF9F     RCALL i2c_Stop
+60:                }
+000F66  FA8000     ULNK
+000F68  060000     RETURN
+61:                
+62:                void i2c_Write1(u8 addr,u8 d1) {
+000F6A  FA0002     LNK #0x2
+000F6C  784F00     MOV.B W0, [W14]
+000F6E  984711     MOV.B W1, [W14+1]
+63:                    i2c_Start();
+000F70  07FF90     RCALL i2c_Start
+64:                    i2c_Put(I2C_WADDR(addr));
+000F72  B3CFE0     MOV.B #0xFE, W0
+000F74  60401E     AND.B W0, [W14], W0
+000F76  07FFA8     RCALL i2c_Put
+65:                    i2c_Put(d1);
+000F78  90401E     MOV.B [W14+1], W0
+000F7A  07FFA6     RCALL i2c_Put
+66:                    i2c_Stop();
+000F7C  07FF93     RCALL i2c_Stop
+67:                }
+000F7E  FA8000     ULNK
+000F80  060000     RETURN
+68:                
+69:                void i2c_Write2(u8 addr,u8 d1, u8 d2) {
+000F82  FA0004     LNK #0x4
+000F84  784F00     MOV.B W0, [W14]
+000F86  984711     MOV.B W1, [W14+1]
+000F88  984722     MOV.B W2, [W14+2]
+70:                    i2c_Start();
+000F8A  07FF83     RCALL i2c_Start
+71:                    i2c_Put(I2C_WADDR( addr));
+000F8C  B3CFE0     MOV.B #0xFE, W0
+000F8E  60401E     AND.B W0, [W14], W0
+000F90  07FF9B     RCALL i2c_Put
+72:                    i2c_Put( d1);
+000F92  90401E     MOV.B [W14+1], W0
+000F94  07FF99     RCALL i2c_Put
+73:                    i2c_Put( d2);
+000F96  90402E     MOV.B [W14+2], W0
+000F98  07FF97     RCALL i2c_Put
+74:                    i2c_Stop();
+000F9A  07FF84     RCALL i2c_Stop
+75:                }
+000F9C  FA8000     ULNK
+000F9E  060000     RETURN
+76:                
+77:                void i2c_RcvBuf(u8 devId, u8 addr, int nBytes, u8* pBuf) {
+000FA0  FA0006     LNK #0x6
+000FA2  784F00     MOV.B W0, [W14]
+000FA4  984711     MOV.B W1, [W14+1]
+000FA6  980712     MOV W2, [W14+2]
+000FA8  980723     MOV W3, [W14+4]
+78:                    i2c_Write1(devId,addr);
+000FAA  90409E     MOV.B [W14+1], W1
+000FAC  78401E     MOV.B [W14], W0
+000FAE  07FFDD     RCALL i2c_Write1
+79:                    i2c_ReadN(devId, pBuf, nBytes);
+000FB0  90001E     MOV [W14+2], W0
+000FB2  780100     MOV W0, W2
+000FB4  9000AE     MOV [W14+4], W1
+000FB6  78401E     MOV.B [W14], W0
+000FB8  07FFBA     RCALL i2c_ReadN
+80:                }
+000FBA  FA8000     ULNK
+000FBC  060000     RETURN
+81:                
+82:                
+---  /Users/sam/Labo/Projects/varioSmooth/VarioSMooth.X/filters.c  --------------------------------------
+1:                 #include "pic24_all.h"
+2:                 
+3:                 
+4:                 
+5:                 // ceofficients for speed flter (maxflat Wn = 0.01)
+6:                 #define B1_0 73
+7:                 #define A1_0 1000
+8:                 #define A1_1 854
+9:                 
+10:                
+11:                // feedforward coefficients
+12:                #define B_0_s    4 // shift 4 = *16
+13:                #define B_1_s  	 5 // shift 5 = *32
+14:                #define B_2_s  	 4 // shift 4 = *16
+15:                // feedback coefficients,
+16:                #define A_0_sr 	11 // shift 11 right = div by 2048
+17:                #define A_1  	3553
+18:                #define A_2  	1569
+19:                
+20:                #define INTEGER_FACTOR 11       // filter Value will be multiplied by 2ÎNTEGER_FACTOR for precision
+21:                
+22:                s64 x_1 = 0LL;
+23:                s64 x_2 = 0LL;
+24:                s64 y_1 = 0LL;
+25:                s64 y_2 = 0LL;
+26:                
+27:                s32 filterPressure(s32 x) {
+00090E  FA001C     LNK #0x1C
+000910  BE9F88     MOV.D W8, [W15++]
+000912  BE9F8A     MOV.D W10, [W15++]
+000914  980F00     MOV W0, [W14+16]
+000916  980F11     MOV W1, [W14+18]
+28:                    s64 xBIG = (s64)(x) << INTEGER_FACTOR;
+000918  90080E     MOV [W14+16], W0
+00091A  90089E     MOV [W14+18], W1
+00091C  DE894F     ASR W1, #15, W2
+00091E  780182     MOV W2, W3
+000920  DD19CB     SL W3, #11, W3
+000922  DE1245     LSR W2, #5, W4
+000924  720183     IOR W4, W3, W3
+000926  DD114B     SL W2, #11, W2
+000928  DE0A45     LSR W1, #5, W4
+00092A  720102     IOR W4, W2, W2
+00092C  DD08CB     SL W1, #11, W1
+00092E  DE0245     LSR W0, #5, W4
+000930  720081     IOR W4, W1, W1
+000932  DD004B     SL W0, #11, W0
+000934  BE9F00     MOV.D W0, [W14++]
+000936  BE9702     MOV.D W2, [W14--]
+29:                    s64 y = (xBIG<<B_0_s) + (x_1<<B_1_s) + (x_2<<B_2_s) + (((s64)A_1*y_1) - ((s64)A_2*y_2));
+000938  BE003E     MOV.D [W14++], W0
+00093A  BE012E     MOV.D [W14--], W2
+00093C  BE0502     MOV.D W2, W10
+00093E  BE0400     MOV.D W0, W8
+000940  DD5DC4     SL W11, #4, W11
+000942  DE52CC     LSR W10, #12, W5
+000944  72858B     IOR W5, W11, W11
+000946  DD5544     SL W10, #4, W10
+000948  DE4ACC     LSR W9, #12, W5
+00094A  72850A     IOR W5, W10, W10
+00094C  DD4CC4     SL W9, #4, W9
+00094E  DE42CC     LSR W8, #12, W5
+000950  728489     IOR W5, W9, W9
+000952  DD4444     SL W8, #4, W8
+000954  2096E0     MOV #0x96E, W0
+000956  BE0150     MOV.D [++W0], W2
+000958  BE0040     MOV.D [--W0], W0
+00095A  DD19C5     SL W3, #5, W3
+00095C  DE134B     LSR W2, #11, W6
+00095E  730183     IOR W6, W3, W3
+000960  DD1145     SL W2, #5, W2
+000962  DE0B4B     LSR W1, #11, W6
+000964  730102     IOR W6, W2, W2
+000966  DD08C5     SL W1, #5, W1
+000968  DE034B     LSR W0, #11, W6
+00096A  730081     IOR W6, W1, W1
+00096C  DD0045     SL W0, #5, W0
+00096E  440200     ADD W8, W0, W4
+000970  4C8281     ADDC W9, W1, W5
+000972  4D0302     ADDC W10, W2, W6
+000974  4D8383     ADDC W11, W3, W7
+000976  209760     MOV #0x976, W0
+000978  BE0150     MOV.D [++W0], W2
+00097A  BE0040     MOV.D [--W0], W0
+00097C  DD19C4     SL W3, #4, W3
+00097E  DE144C     LSR W2, #12, W8
+000980  740183     IOR W8, W3, W3
+000982  DD1144     SL W2, #4, W2
+000984  DE0C4C     LSR W1, #12, W8
+000986  740102     IOR W8, W2, W2
+000988  DD08C4     SL W1, #4, W1
+00098A  DE044C     LSR W0, #12, W8
+00098C  740081     IOR W8, W1, W1
+00098E  DD0044     SL W0, #4, W0
+000990  420400     ADD W4, W0, W8
+000992  4A8481     ADDC W5, W1, W9
+000994  4B0502     ADDC W6, W2, W10
+000996  4B8583     ADDC W7, W3, W11
+000998  2097E0     MOV #0x97E, W0
+00099A  BE0150     MOV.D [++W0], W2
+00099C  BE0040     MOV.D [--W0], W0
+00099E  20DE14     MOV #0xDE1, W4
+0009A0  200005     MOV #0x0, W5
+0009A2  B83360     MUL.UU W6, #0, W6
+0009A4  07FCA2     RCALL 0x2EA
+0009A6  BE0302     MOV.D W2, W6
+0009A8  BE0200     MOV.D W0, W4
+0009AA  980F24     MOV W4, [W14+20]
+0009AC  980F35     MOV W5, [W14+22]
+0009AE  980F46     MOV W6, [W14+24]
+0009B0  980F57     MOV W7, [W14+26]
+0009B2  209860     MOV #0x986, W0
+0009B4  BE0150     MOV.D [++W0], W2
+0009B6  BE0040     MOV.D [--W0], W0
+0009B8  2F9DF4     MOV #0xF9DF, W4
+0009BA  2FFFF5     MOV #0xFFFF, W5
+0009BC  2FFFF6     MOV #0xFFFF, W6
+0009BE  2FFFF7     MOV #0xFFFF, W7
+0009C0  07FC94     RCALL 0x2EA
+0009C2  900A2E     MOV [W14+20], W4
+0009C4  900ABE     MOV [W14+22], W5
+0009C6  900B4E     MOV [W14+24], W6
+0009C8  900BDE     MOV [W14+26], W7
+0009CA  420000     ADD W4, W0, W0
+0009CC  4A8081     ADDC W5, W1, W1
+0009CE  4B0102     ADDC W6, W2, W2
+0009D0  4B8183     ADDC W7, W3, W3
+0009D2  440000     ADD W8, W0, W0
+0009D4  4C8081     ADDC W9, W1, W1
+0009D6  4D0102     ADDC W10, W2, W2
+0009D8  4D8183     ADDC W11, W3, W3
+0009DA  980740     MOV W0, [W14+8]
+0009DC  980751     MOV W1, [W14+10]
+0009DE  980762     MOV W2, [W14+12]
+0009E0  980773     MOV W3, [W14+14]
+30:                
+31:                    x_2 = x_1;
+0009E2  2096E0     MOV #0x96E, W0
+0009E4  BE0150     MOV.D [++W0], W2
+0009E6  BE0040     MOV.D [--W0], W0
+0009E8  209764     MOV #0x976, W4
+0009EA  BE9A00     MOV.D W0, [W4++]
+0009EC  BE9202     MOV.D W2, [W4--]
+32:                    x_1 = xBIG;
+0009EE  2096E0     MOV #0x96E, W0
+0009F0  BE023E     MOV.D [W14++], W4
+0009F2  BE032E     MOV.D [W14--], W6
+0009F4  BE9804     MOV.D W4, [W0++]
+0009F6  BE9006     MOV.D W6, [W0--]
+33:                
+34:                    y_2 = y_1;
+0009F8  2097E0     MOV #0x97E, W0
+0009FA  BE0150     MOV.D [++W0], W2
+0009FC  BE0040     MOV.D [--W0], W0
+0009FE  209864     MOV #0x986, W4
+000A00  BE9A00     MOV.D W0, [W4++]
+000A02  BE9202     MOV.D W2, [W4--]
+35:                    y_1 = y>>A_0_sr;
+000A04  90004E     MOV [W14+8], W0
+000A06  9000DE     MOV [W14+10], W1
+000A08  90016E     MOV [W14+12], W2
+000A0A  9001FE     MOV [W14+14], W3
+000A0C  DE004B     LSR W0, #11, W0
+000A0E  DD0AC5     SL W1, #5, W5
+000A10  728000     IOR W5, W0, W0
+000A12  DE08CB     LSR W1, #11, W1
+000A14  DD12C5     SL W2, #5, W5
+000A16  728081     IOR W5, W1, W1
+000A18  DE114B     LSR W2, #11, W2
+000A1A  DD1AC5     SL W3, #5, W5
+000A1C  728102     IOR W5, W2, W2
+000A1E  DE99CB     ASR W3, #11, W3
+000A20  2097E4     MOV #0x97E, W4
+000A22  BE9A00     MOV.D W0, [W4++]
+000A24  BE9202     MOV.D W2, [W4--]
+36:                
+37:                    return (s32)(y_1 >> INTEGER_FACTOR);
+000A26  2097E0     MOV #0x97E, W0
+000A28  BE0150     MOV.D [++W0], W2
+000A2A  BE0040     MOV.D [--W0], W0
+000A2C  DE004B     LSR W0, #11, W0
+000A2E  DD0B45     SL W1, #5, W6
+000A30  730000     IOR W6, W0, W0
+000A32  DE08CB     LSR W1, #11, W1
+000A34  DD1345     SL W2, #5, W6
+000A36  730081     IOR W6, W1, W1
+000A38  BE0000     MOV.D W0, W0
+38:                }
+000A3A  BE054F     MOV.D [--W15], W10
+000A3C  BE044F     MOV.D [--W15], W8
+000A3E  FA8000     ULNK
+000A40  060000     RETURN
+39:                
+40:                
+41:                s32 y1_1 = 0L;
+42:                s32 x1_1 = 0L;
+43:                
+44:                // 1st order IIR low pass for speed
+45:                s32 speedIIRFilter(s32 x) {
+000A42  FA0008     LNK #0x8
+000A44  980720     MOV W0, [W14+4]
+000A46  980731     MOV W1, [W14+6]
+46:                    s32 y = (B1_0 * (x + x1_1)) + (A1_1 * y1_1);
+000A48  804C92     MOV x1_1, W2
+000A4A  804CA3     MOV 0x994, W3
+000A4C  90002E     MOV [W14+4], W0
+000A4E  9000BE     MOV [W14+6], W1
+000A50  400002     ADD W0, W2, W0
+000A52  488083     ADDC W1, W3, W1
+000A54  200492     MOV #0x49, W2
+000A56  B98902     MUL.SS W1, W2, W2
+000A58  780202     MOV W2, W4
+000A5A  B90160     MUL.SU W0, #0, W2
+000A5C  780102     MOV W2, W2
+000A5E  420202     ADD W4, W2, W4
+000A60  200492     MOV #0x49, W2
+000A62  B80102     MUL.UU W0, W2, W2
+000A64  420203     ADD W4, W3, W4
+000A66  780184     MOV W4, W3
+000A68  804C70     MOV y1_1, W0
+000A6A  804C81     MOV 0x990, W1
+000A6C  203564     MOV #0x356, W4
+000A6E  B98A04     MUL.SS W1, W4, W4
+000A70  780204     MOV W4, W4
+000A72  B90360     MUL.SU W0, #0, W6
+000A74  780286     MOV W6, W5
+000A76  420205     ADD W4, W5, W4
+000A78  203565     MOV #0x356, W5
+000A7A  B80005     MUL.UU W0, W5, W0
+000A7C  420201     ADD W4, W1, W4
+000A7E  780084     MOV W4, W1
+000A80  411F00     ADD W2, W0, [W14++]
+000A82  499701     ADDC W3, W1, [W14--]
+47:                    x1_1 = x;
+000A84  90012E     MOV [W14+4], W2
+000A86  9001BE     MOV [W14+6], W3
+000A88  884C92     MOV W2, x1_1
+000A8A  884CA3     MOV W3, 0x994
+48:                    y1_1 = y/(A1_0);
+000A8C  BE001E     MOV.D [W14], W0
+000A8E  203E82     MOV #0x3E8, W2
+000A90  200003     MOV #0x0, W3
+000A92  07FC0C     RCALL 0x2AC
+000A94  884C70     MOV W0, y1_1
+000A96  884C81     MOV W1, 0x990
+49:                    return y1_1;
+000A98  804C70     MOV y1_1, W0
+000A9A  804C81     MOV 0x990, W1
+50:                }
+000A9C  FA8000     ULNK
+000A9E  060000     RETURN
+---  /Users/sam/Labo/Projects/varioSmooth/VarioSMooth.X/button.c  ---------------------------------------
+1:                 #include "pic24_all.h"
+2:                 #include "timers.h"
+3:                 #include "audio.h"
+4:                 #include "vario.h"
+5:                 #include "uart.h"
+6:                 #include <stdio.h>
+7:                 
+8:                 #define SW1             _RB7            //switch state
+9:                 #define SW1_PRESSED()   (SW1==0)        //switch test
+10:                #define SW1_RELEASED()  (SW1==1)        //switch test
+11:                
+12:                #define LONG_PRESS_MIN_PERIOD 500 // ticks
+13:                #define MIN_PRESS_PERIOD 10 // minimum tick count - otherwise it's considered as a boucing button
+14:                #define PRESS_TIMEOUT 600      // TIMEOUT
+15:                #define ANTI_BOUNCE_PEROD 70    // to avoid bounces that occure when pushing button
+16:                
+17:                
+18:                
+19:                void button_Config(void) {
+000D64  FA0000     LNK #0x0
+20:                    CONFIG_RB7_AS_DIG_INPUT();
+000D66  07FFF3     RCALL CONFIG_RB7_AS_DIG_INPUT
+21:                    _CNIF = 0;  // clear CN Interrupt Flag
+000D68  A96086     BCLR IFS1, #3
+22:                    ENABLE_RB7_CN_INTERRUPT();
+000D6A  A8E062     BSET CNEN2, #7
+23:                    _CNIP = 1; // CN interruptions priority
+000D6C  800560     MOV IPC4, W0
+000D6E  A0C000     BSET W0, #12
+000D70  A1D000     BCLR W0, #13
+000D72  A1E000     BCLR W0, #14
+000D74  880560     MOV W0, IPC4
+24:                    _CNIE = 1; //enable the Change Notification general interrupt
+000D76  A86096     BSET IEC1, #3
+25:                }
+000D78  FA8000     ULNK
+000D7A  060000     RETURN
+26:                
+27:                void wait3(u32 ticks) {
+000D7C  FA0004     LNK #0x4
+000D7E  BE8F00     MOV.D W0, [W14]
+28:                    _T3IF = 0;
+000D80  A90085     BCLR 0x85, #0
+29:                    tmr3_Start();
+000D82  0701A0     RCALL tmr3_Start
+30:                    while(tmr3_Get() < ticks) {
+000D84  370001     BRA 0xD88
+000D88  0701A3     RCALL tmr3_Get
+000D8A  EB0080     CLR W1
+000D8C  500FBE     SUB W0, [W14++], [W15]
+000D8E  588FAE     SUBB W1, [W14--], [W15]
+000D90  39FFFA     BRA NC, 0xD86
+31:                        Nop();
+000D86  000000     NOP
+32:                    }
+33:                    tmr3_Stop();
+000D92  0701A2     RCALL tmr3_Stop
+34:                }
+000D94  FA8000     ULNK
+000D96  060000     RETURN
+35:                
+36:                void shutdown(void) {
+000D98  FA0000     LNK #0x0
+37:                    audio_Beep(2200);
+000D9A  208980     MOV #0x898, W0
+000D9C  200001     MOV #0x0, W1
+000D9E  07FEB1     RCALL audio_Beep
+38:                    wait3(80);
+000DA0  200500     MOV #0x50, W0
+000DA2  200001     MOV #0x0, W1
+000DA4  07FFEB     RCALL wait3
+39:                //    audio_Beep(0);
+40:                //    wait3(100);
+41:                    audio_Beep(1100);
+000DA6  2044C0     MOV #0x44C, W0
+000DA8  200001     MOV #0x0, W1
+000DAA  07FEAB     RCALL audio_Beep
+42:                    wait3(80);
+000DAC  200500     MOV #0x50, W0
+000DAE  200001     MOV #0x0, W1
+000DB0  07FFE5     RCALL wait3
+43:                //    audio_Beep(0);
+44:                //    wait3(50);
+45:                    audio_Beep(220);
+000DB2  200DC0     MOV #0xDC, W0
+000DB4  200001     MOV #0x0, W1
+000DB6  07FEA5     RCALL audio_Beep
+46:                    wait3(80);
+000DB8  200500     MOV #0x50, W0
+000DBA  200001     MOV #0x0, W1
+000DBC  07FFDF     RCALL wait3
+47:                    audio_Beep(0);
+000DBE  B80060     MUL.UU W0, #0, W0
+000DC0  07FEA0     RCALL audio_Beep
+48:                
+49:                    tmr1_Stop();
+000DC2  07012E     RCALL tmr1_Stop
+50:                    tmr2_Stop();
+000DC4  070169     RCALL tmr2_Stop
+51:                    CONFIG_RB14_AS_DIG_INPUT();
+000DC6  07FFC8     RCALL CONFIG_RB14_AS_DIG_INPUT
+52:                    comparatorStop();
+000DC8  07FE91     RCALL comparatorStop
+53:                    _INT0EP = 1;    // set INT0 Interrupt Priority
+000DCA  A80082     BSET INTCON2, #0
+54:                    _INT0IE = 1;    // Enable INT0 Interrupt
+000DCC  A80094     BSET IEC0, #0
+55:                    _DSEN = 1;      // Enable Deep Sleep
+000DCE  A8E759     BSET 0x759, #7
+56:                    Sleep();        // Go to Deep Sleep
+000DD0  FE4000     PWRSAV #0
+57:                    Nop();
+000DD2  000000     NOP
+58:                }
+000DD4  FA8000     ULNK
+000DD6  060000     RETURN
+59:                
+60:                void buttonJingle(void) {
+000DD8  FA0000     LNK #0x0
+61:                    audio_Beep(220);
+000DDA  200DC0     MOV #0xDC, W0
+000DDC  200001     MOV #0x0, W1
+000DDE  07FE91     RCALL audio_Beep
+62:                    wait3(50);
+000DE0  200320     MOV #0x32, W0
+000DE2  200001     MOV #0x0, W1
+000DE4  07FFCB     RCALL wait3
+63:                    audio_Beep(0);
+000DE6  B80060     MUL.UU W0, #0, W0
+000DE8  07FE8C     RCALL audio_Beep
+64:                    wait3(50);
+000DEA  200320     MOV #0x32, W0
+000DEC  200001     MOV #0x0, W1
+000DEE  07FFC6     RCALL wait3
+65:                    audio_Beep(220);
+000DF0  200DC0     MOV #0xDC, W0
+000DF2  200001     MOV #0x0, W1
+000DF4  07FE86     RCALL audio_Beep
+66:                    wait3(50);
+000DF6  200320     MOV #0x32, W0
+000DF8  200001     MOV #0x0, W1
+000DFA  07FFC0     RCALL wait3
+67:                    audio_Beep(0);
+000DFC  B80060     MUL.UU W0, #0, W0
+000DFE  07FE81     RCALL audio_Beep
+68:                    wait3(50);
+000E00  200320     MOV #0x32, W0
+000E02  200001     MOV #0x0, W1
+000E04  07FFBB     RCALL wait3
+69:                    audio_Beep(220);
+000E06  200DC0     MOV #0xDC, W0
+000E08  200001     MOV #0x0, W1
+000E0A  07FE7B     RCALL audio_Beep
+70:                    wait3(50);
+000E0C  200320     MOV #0x32, W0
+000E0E  200001     MOV #0x0, W1
+000E10  07FFB5     RCALL wait3
+71:                    audio_Beep(0);
+000E12  B80060     MUL.UU W0, #0, W0
+000E14  07FE76     RCALL audio_Beep
+72:                }
+000E16  FA8000     ULNK
+000E18  060000     RETURN
+73:                
+74:                void tmr3_callback(void) {
+000E1A  FA0000     LNK #0x0
+75:                    _T3IF = 0;
+000E1C  A90085     BCLR 0x85, #0
+76:                    _T3IE = 0;
+000E1E  A90095     BCLR 0x95, #0
+77:                    vario_reset_shutdown_counter();
+000E20  07FB7E     RCALL vario_reset_shutdown_counter
+78:                    tmr3_Stop();
+000E22  07015A     RCALL tmr3_Stop
+79:                    setNextVolume();
+000E24  07FECB     RCALL setNextVolume
+80:                    buttonJingle();
+000E26  07FFD8     RCALL buttonJingle
+81:                    
+82:                }
+000E28  FA8000     ULNK
+000E2A  060000     RETURN
+83:                
+84:                 void __attribute__((interrupt, no_auto_psv)) _CNInterrupt(void) {
+000E2C  F80036     PUSH RCOUNT
+000E2E  BE9F80     MOV.D W0, [W15++]
+000E30  BE9F82     MOV.D W2, [W15++]
+000E32  BE9F84     MOV.D W4, [W15++]
+000E34  BE9F86     MOV.D W6, [W15++]
+000E36  FA0000     LNK #0x0
+85:                    _CNIF = 0;              // Clear Change Notification Interrupt Flag
+000E38  A96086     BCLR IFS1, #3
+86:                    DISABLE_RB7_CN_INTERRUPT(); // Disable CN Interrupt for bounces
+000E3A  A9E062     BCLR CNEN2, #7
+87:                
+88:                    // anti-bounce
+89:                    wait3(ANTI_BOUNCE_PEROD);
+000E3C  200460     MOV #0x46, W0
+000E3E  200001     MOV #0x0, W1
+000E40  07FF9D     RCALL wait3
+90:                    tmr3_Start();           // Start Timer for press duration measurement 
+000E42  070140     RCALL tmr3_Start
+91:                
+92:                    if (SW1_PRESSED()){
+000E44  801651     MOV PORTB, W1
+000E46  200800     MOV #0x80, W0
+000E48  608000     AND W1, W0, W0
+000E4A  E00000     CP0 W0
+000E4C  3A0014     BRA NZ, 0xE76
+93:                        while(SW1_PRESSED() && tmr3_Get() < PRESS_TIMEOUT) {Nop();}
+000E4E  370001     BRA 0xE52
+000E50  000000     NOP
+000E52  801651     MOV PORTB, W1
+000E54  200800     MOV #0x80, W0
+000E56  608000     AND W1, W0, W0
+000E58  E00000     CP0 W0
+000E5A  3A0004     BRA NZ, 0xE64
+000E5C  070139     RCALL tmr3_Get
+000E5E  202571     MOV #0x257, W1
+000E60  500F81     SUB W0, W1, [W15]
+000E62  36FFF6     BRA LEU, 0xE50
+94:                        if (tmr3_Get() > LONG_PRESS_MIN_PERIOD) {
+000E64  070135     RCALL tmr3_Get
+000E66  201F41     MOV #0x1F4, W1
+000E68  500F81     SUB W0, W1, [W15]
+000E6A  360002     BRA LEU, 0xE70
+95:                            // Long press -> Entering deep sleep mode
+96:                            shutdown();
+000E6C  07FF95     RCALL shutdown
+000E6E  370003     BRA 0xE76
+97:                        } else {
+98:                            // Short press -> set new Volume
+99:                            vario_reset_shutdown_counter();
+000E70  07FB56     RCALL vario_reset_shutdown_counter
+100:                           setNextVolume();
+000E72  07FEA4     RCALL setNextVolume
+101:                           buttonJingle();
+000E74  07FFB1     RCALL buttonJingle
+102:                       }
+103:                   }
+104:                   tmr3_Stop();
+000E76  070130     RCALL tmr3_Stop
+105:                   ENABLE_RB7_CN_INTERRUPT();
+000E78  A8E062     BSET CNEN2, #7
+106:               }
+000E7A  FA8000     ULNK
+000E7C  BE034F     MOV.D [--W15], W6
+000E7E  BE024F     MOV.D [--W15], W4
+000E80  BE014F     MOV.D [--W15], W2
+000E82  BE004F     MOV.D [--W15], W0
+000E84  F90036     POP RCOUNT
+000E86  064000     RETFIE
+107:                
+---  /Users/sam/Labo/Projects/varioSmooth/VarioSMooth.X/audio.c  ----------------------------------------
+1:                 #include "pic24_all.h"
+2:                 #include "i2c.h"
+3:                 
+4:                 // MCP4542 has a 7 bits resolution between 0 and Rmax (10kOhms here)
+5:                 #define I2C_ID_MCP4542 ((u8)0b01011000)
+6:                 #define I2C_MCP4542_WRITE_VOLATILE ((u8)0b00000000)
+7:                 #define I2C_MCP4542_READ_VOLATILE  ((u8)0b00001100)
+8:                 #define I2C_MCP4542_WRITE_NON_VOLATILE ((u8)0b01110000)
+9:                 #define I2C_MCP4542_READ_NON_VOLATILE  ((u8)0b01111100)
+10:                
+11:                #define VOL_BOOST  ((u8)0b01111111) // level 4
+12:                #define VOL_HIGH   ((u8)0b00000000) // level 3
+13:                #define VOL_MEDIUM ((u8)0b00000110) // level 2
+14:                #define VOL_LOW    ((u8)0b00101111) // level 1
+15:                
+16:                u8 volState = 0;
+17:                u8 volState_previous = 0;
+18:                /// OCM 1 config
+19:                void audio_Config(void) {
+000ABA  FA0000     LNK #0x0
+20:                    OC1CONbits.OCTSEL = 0;  // use TMR2
+000ABC  A96184     BCLR OC1CON, #3
+21:                    OC1CONbits.OCSIDL = 0;  // Continue in Idle Mode    
+000ABE  A9A185     BCLR 0x185, #5
+22:                    CM1CONbits.COE = 0;     // output goes not (yet) to pin 17
+000AC0  A9C635     BCLR 0x635, #6
+23:                    CM1CONbits.CPOL = 1;    // inverted
+000AC2  A8A635     BSET 0x635, #5
+24:                    CM1CONbits.CLPWR = 0;   // no operation in low power mode
+000AC4  A98635     BCLR 0x635, #4
+25:                    CM1CONbits.EVPOL = 0;   // no interrupt/event
+000AC6  8031A0     MOV CM1CON, W0
+000AC8  A16000     BCLR W0, #6
+000ACA  A17000     BCLR W0, #7
+000ACC  8831A0     MOV W0, CM1CON
+26:                    CM1CONbits.CREF = 0;    // + input connected to C1INA (pin 8)
+000ACE  A98634     BCLR CM1CON, #4
+27:                    CM1CONbits.CCH = 3;     // - input connected to VBG/2
+000AD0  8031A0     MOV CM1CON, W0
+000AD2  A00000     BSET W0, #0
+000AD4  A01000     BSET W0, #1
+000AD6  8831A0     MOV W0, CM1CON
+28:                    CM1CONbits.CEN = 0;     // Disable
+000AD8  A9E635     BCLR 0x635, #7
+29:                
+30:                    Nop();Nop();Nop();Nop();Nop();
+000ADA  000000     NOP
+000ADC  000000     NOP
+000ADE  000000     NOP
+000AE0  000000     NOP
+000AE2  000000     NOP
+31:                    _C1EVT = 0; //clear C1 event flag
+000AE4  A90631     BCLR 0x631, #0
+32:                    _CMIF = 0;  //clear interrupt flag
+000AE6  A94086     BCLR IFS1, #2
+33:                }
+000AE8  FA8000     ULNK
+000AEA  060000     RETURN
+34:                
+35:                void comparatorStop() {
+000AEC  FA0000     LNK #0x0
+36:                    CM1CONbits.CEN = 0;     // Disable
+000AEE  A9E635     BCLR 0x635, #7
+37:                    CM1CONbits.COE = 0;     // output goes not to pin 17
+000AF0  A9C635     BCLR 0x635, #6
+38:                    _RB14 = 0;
+000AF2  A9C2CB     BCLR 0x2CB, #6
+39:                }
+000AF4  FA8000     ULNK
+000AF6  060000     RETURN
+40:                
+41:                void comparatorStart() {
+000AF8  FA0000     LNK #0x0
+42:                    CM1CONbits.COE = 1;     // output goes to pin 17
+000AFA  A8C635     BSET 0x635, #6
+43:                    CM1CONbits.CEN = 1;     // Enable
+000AFC  A8E635     BSET 0x635, #7
+44:                }
+000AFE  FA8000     ULNK
+000B00  060000     RETURN
+45:                
+46:                void audio_Beep(u32 freq){
+000B02  FA0006     LNK #0x6
+000B04  980710     MOV W0, [W14+2]
+000B06  980721     MOV W1, [W14+4]
+47:                    u16 tmrTicks;
+48:                    OC1CONbits.OCM = 0; // disable ocm
+000B08  800C20     MOV OC1CON, W0
+000B0A  A10000     BCLR W0, #0
+000B0C  A11000     BCLR W0, #1
+000B0E  A12000     BCLR W0, #2
+000B10  880C20     MOV W0, OC1CON
+49:                    tmr2_Stop();
+000B12  0702C2     RCALL tmr2_Stop
+50:                
+51:                    if (freq) {
+000B14  90001E     MOV [W14+2], W0
+000B16  9000AE     MOV [W14+4], W1
+000B18  500FE0     SUB W0, #0x0, [W15]
+000B1A  588FE0     SUBB W1, #0x0, [W15]
+000B1C  320010     BRA Z, 0xB3E
+52:                        tmrTicks = (u16)((FCY>>3)/freq);
+000B1E  90011E     MOV [W14+2], W2
+000B20  9001AE     MOV [W14+4], W3
+000B22  27A120     MOV #0x7A12, W0
+000B24  200001     MOV #0x0, W1
+000B26  07FBD1     RCALL 0x2CA
+000B28  780F00     MOV W0, [W14]
+53:                        
+54:                        // square wave:
+55:                //        OC1R = (tmrTicks >> 1);
+56:                        OC1RS = (tmrTicks >> 1);
+000B2A  78001E     MOV [W14], W0
+000B2C  D10000     LSR W0, W0
+000B2E  880C00     MOV W0, OC1RS
+57:                
+58:                        tmr2_Start(tmrTicks);
+000B30  78001E     MOV [W14], W0
+000B32  0702AB     RCALL tmr2_Start
+59:                
+60:                        OC1CONbits.OCM = 6; // PWM Mode
+000B34  800C20     MOV OC1CON, W0
+000B36  A10000     BCLR W0, #0
+000B38  A01000     BSET W0, #1
+000B3A  A02000     BSET W0, #2
+000B3C  880C20     MOV W0, OC1CON
+61:                
+62:                    } // else : the silencious beep
+63:                }
+000B3E  FA8000     ULNK
+000B40  060000     RETURN
+64:                
+65:                void setBoostVolume(void) {
+000B42  FA0000     LNK #0x0
+66:                    i2c_Write2(I2C_ID_MCP4542,I2C_MCP4542_WRITE_VOLATILE,VOL_BOOST);
+000B44  B3C7F2     MOV.B #0x7F, W2
+000B46  EB4080     CLR.B W1
+000B48  B3C580     MOV.B #0x58, W0
+000B4A  07021B     RCALL i2c_Write2
+67:                    i2c_Write2(I2C_ID_MCP4542,I2C_MCP4542_WRITE_NON_VOLATILE,(u8)4);
+000B4C  B3C042     MOV.B #0x4, W2
+000B4E  B3C701     MOV.B #0x70, W1
+000B50  B3C580     MOV.B #0x58, W0
+000B52  070217     RCALL i2c_Write2
+68:                    CONFIG_RB14_AS_DIG_OUTPUT();    
+000B54  07FFA5     RCALL CONFIG_RB14_AS_DIG_OUTPUT
+69:                    comparatorStart();
+000B56  07FFD0     RCALL comparatorStart
+70:                }
+000B58  FA8000     ULNK
+000B5A  060000     RETURN
+71:                void setHighVolume(void) {
+000B5C  FA0000     LNK #0x0
+72:                    comparatorStop();
+000B5E  07FFC6     RCALL comparatorStop
+73:                    CONFIG_RB14_AS_DIG_INPUT();
+000B60  07FFA6     RCALL CONFIG_RB14_AS_DIG_INPUT
+74:                    i2c_Write2(I2C_ID_MCP4542,I2C_MCP4542_WRITE_VOLATILE,VOL_HIGH);
+000B62  EB4100     CLR.B W2
+000B64  EB4080     CLR.B W1
+000B66  B3C580     MOV.B #0x58, W0
+000B68  07020C     RCALL i2c_Write2
+75:                    i2c_Write2(I2C_ID_MCP4542,I2C_MCP4542_WRITE_NON_VOLATILE,(u8)3);
+000B6A  B3C032     MOV.B #0x3, W2
+000B6C  B3C701     MOV.B #0x70, W1
+000B6E  B3C580     MOV.B #0x58, W0
+000B70  070208     RCALL i2c_Write2
+76:                }
+000B72  FA8000     ULNK
+000B74  060000     RETURN
+77:                void setMediumVolume(void) {
+000B76  FA0000     LNK #0x0
+78:                    comparatorStop();
+000B78  07FFB9     RCALL comparatorStop
+79:                    CONFIG_RB14_AS_DIG_INPUT();
+000B7A  07FF99     RCALL CONFIG_RB14_AS_DIG_INPUT
+80:                    i2c_Write2(I2C_ID_MCP4542,I2C_MCP4542_WRITE_VOLATILE,VOL_MEDIUM);
+000B7C  B3C062     MOV.B #0x6, W2
+000B7E  EB4080     CLR.B W1
+000B80  B3C580     MOV.B #0x58, W0
+000B82  0701FF     RCALL i2c_Write2
+81:                    i2c_Write2(I2C_ID_MCP4542,I2C_MCP4542_WRITE_NON_VOLATILE,(u8)2);
+000B84  B3C022     MOV.B #0x2, W2
+000B86  B3C701     MOV.B #0x70, W1
+000B88  B3C580     MOV.B #0x58, W0
+000B8A  0701FB     RCALL i2c_Write2
+82:                }
+000B8C  FA8000     ULNK
+000B8E  060000     RETURN
+83:                void setLowVolume(void) {
+000B90  FA0000     LNK #0x0
+84:                    comparatorStop();
+000B92  07FFAC     RCALL comparatorStop
+85:                    CONFIG_RB14_AS_DIG_INPUT();
+000B94  07FF8C     RCALL CONFIG_RB14_AS_DIG_INPUT
+86:                    i2c_Write2(I2C_ID_MCP4542,I2C_MCP4542_WRITE_VOLATILE,VOL_LOW);
+000B96  B3C2F2     MOV.B #0x2F, W2
+000B98  EB4080     CLR.B W1
+000B9A  B3C580     MOV.B #0x58, W0
+000B9C  0701F2     RCALL i2c_Write2
+87:                    i2c_Write2(I2C_ID_MCP4542,I2C_MCP4542_WRITE_NON_VOLATILE,(u8)1);
+000B9E  B3C012     MOV.B #0x1, W2
+000BA0  B3C701     MOV.B #0x70, W1
+000BA2  B3C580     MOV.B #0x58, W0
+000BA4  0701EE     RCALL i2c_Write2
+88:                }
+000BA6  FA8000     ULNK
+000BA8  060000     RETURN
+89:                
+90:                u8 getVolume(void) {
+000BAA  FA0002     LNK #0x2
+91:                    u8 temp[2];
+92:                    i2c_RcvBuf(I2C_ID_MCP4542, I2C_MCP4542_READ_NON_VOLATILE, 2, temp);
+000BAC  78018E     MOV W14, W3
+000BAE  200022     MOV #0x2, W2
+000BB0  B3C7C1     MOV.B #0x7C, W1
+000BB2  B3C580     MOV.B #0x58, W0
+000BB4  0701F5     RCALL i2c_RcvBuf
+93:                    return (u8)temp[1];
+000BB6  90401E     MOV.B [W14+1], W0
+94:                }
+000BB8  FA8000     ULNK
+000BBA  060000     RETURN
+95:                
+96:                void setNextVolume(void) {
+000BBC  FA0000     LNK #0x0
+97:                //    if(volState == 4) {
+98:                //     setLowVolume();
+99:                //        volState = 1;
+100:               //    }
+101:                   if(volState == 4) {
+000BBE  BFC9B0     MOV.B volState, WREG
+000BC0  504FE4     SUB.B W0, #0x4, [W15]
+000BC2  3A0004     BRA NZ, 0xBCC
+102:                       setMediumVolume();
+000BC4  07FFD8     RCALL setMediumVolume
+103:                       volState = 2;
+000BC6  B3C020     MOV.B #0x2, W0
+000BC8  B7E9B0     MOV.B WREG, volState
+000BCA  370011     BRA 0xBEE
+104:                   }
+105:                   else if(volState == 2) {
+000BCC  BFC9B0     MOV.B volState, WREG
+000BCE  504FE2     SUB.B W0, #0x2, [W15]
+000BD0  3A0004     BRA NZ, 0xBDA
+106:                       setHighVolume();
+000BD2  07FFC4     RCALL setHighVolume
+107:                       volState = 3;
+000BD4  B3C030     MOV.B #0x3, W0
+000BD6  B7E9B0     MOV.B WREG, volState
+000BD8  37000A     BRA 0xBEE
+108:                   }
+109:                   else if(volState == 3) {
+000BDA  BFC9B0     MOV.B volState, WREG
+000BDC  504FE3     SUB.B W0, #0x3, [W15]
+000BDE  3A0004     BRA NZ, 0xBE8
+110:                           setBoostVolume();
+000BE0  07FFB0     RCALL setBoostVolume
+111:                           volState = 4;
+000BE2  B3C040     MOV.B #0x4, W0
+000BE4  B7E9B0     MOV.B WREG, volState
+000BE6  370003     BRA 0xBEE
+112:                       }
+113:                   else {
+114:                       setBoostVolume();
+000BE8  07FFAC     RCALL setBoostVolume
+115:                       volState = 4;
+000BEA  B3C040     MOV.B #0x4, W0
+000BEC  B7E9B0     MOV.B WREG, volState
+116:                   }
+117:                   //setLowVolume();
+118:               }
+000BEE  FA8000     ULNK
+000BF0  060000     RETURN
+119:               
+120:               void setPreviousVolume(void) {
+000BF2  FA0000     LNK #0x0
+121:                   volState = getVolume() - 1;
+000BF4  07FFDA     RCALL getVolume
+000BF6  E94000     DEC.B W0, W0
+000BF8  B7E9B0     MOV.B WREG, volState
+122:                   if(volState == 1) {volState = 4;}
+000BFA  BFC9B0     MOV.B volState, WREG
+000BFC  504FE1     SUB.B W0, #0x1, [W15]
+000BFE  3A0002     BRA NZ, 0xC04
+000C00  B3C040     MOV.B #0x4, W0
+000C02  B7E9B0     MOV.B WREG, volState
+123:                   setNextVolume();
+000C04  07FFDB     RCALL setNextVolume
+124:               }
+000C06  FA8000     ULNK
+000C08  060000     RETURN
