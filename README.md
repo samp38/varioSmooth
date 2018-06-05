@@ -39,4 +39,4 @@ The code can be found in the [MPLABX project folder](VarioSMooth.X). Microchip's
 
 ### Programming the board
 The PIC can be programmed via the PGC and PGD pads on the bottom of the board. Ground and a Power must also be ok (VCC from programmer or the solar panel/battery). I used a PICKT 2, very cheap programmer for pics.
-![](https://goo.gl/images/8dnDOs)
+![](doc/pickit2-pinout.jpg)
