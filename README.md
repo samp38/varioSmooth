@@ -30,4 +30,5 @@ The variometer transcribes vertical speed to audio signal and must contain a pow
 
 ## PCB
 ![](doc/_TOP_small.png)![](doc/_BOTTOM_small.png)![](doc/_BOTTOM_reversed_small.png)
+The schematics are in the [doc folder](doc).
 
