@@ -30,5 +30,13 @@ The variometer transcribes vertical speed to audio signal and must contain a pow
 
 ## PCB
 ![](doc/_TOP_small.png)![](doc/_BOTTOM_small.png)![](doc/_BOTTOM_reversed_small.png)
-The schematics are in the [doc folder](doc).
 
+The schematics and GERBER files are in the [pcb folder](pcb).  [iTead](https://www.itead.cc/open-pcb/pcb-prototyping/2layer-green-pcb-5cm-x-5cm-max.html) pcb protoyping service is a good deal to get your boards (10$ for 10 pieces).
+
+## Programming the board
+### Binary  file
+The code can be found in the [MPLABX project folder](VarioSMooth.X). Microchip's MPLABX IDE is free, as is the XC16 compiler. If you don't feel like building it, just download the [binary file](releases/download/v/VarioSMooth.hex).
+
+### Programming the board
+The PIC can be programmed via the PGC and PGD pads on the bottom of the board. Ground and a Power must also be ok (VCC from programmer or the solar panel/battery). I used a PICKT 2, very cheap programmer for pics.
+![](https://goo.gl/images/8dnDOs)
