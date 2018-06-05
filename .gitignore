@@ -1,0 +1,7 @@
+.DS_Store
+VarioSMooth.X/build
+VarioSMooth.X/dist
+*.b#*
+*.s#*
+*.l#*
+*~.*
