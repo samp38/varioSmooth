@@ -19,7 +19,7 @@ The variometer transcribes vertical speed to audio signal and must contain a pow
 
 * **[PIC24F16KA101](https://www.microchip.com/wwwproducts/en/PIC24F16KA101)** : this microcontroller is the brain of the vario. It communicates with the pressure sensor, does all the calculations and generates the audio signal. You mest get the 20 leads SSOP package.
 
-* **MCP4542** : Microchip digital I2C potentiometer used to adjust audio volume. [reference](https://www.microchip.com/wwwproducts/en/MCP4542)
+* **[MCP4542](https://www.microchip.com/wwwproducts/en/MCP4542)** : Microchip digital I2C potentiometer used to adjust audio volume.
 
 * **[ADP160](http://www.analog.com/en/products/power-management/ldo-linear-regulators/positive-linear-regulators/adp160.html)** : Analog Device ultra low quiescent current ldo regulator. It supplies stabilized power to electronics. Get the 2.8 or 3V version.
 
@@ -29,13 +29,13 @@ The variometer transcribes vertical speed to audio signal and must contain a pow
 
 * **buzzer** : i like the kingstate's [KPEG006](http://uk.farnell.com/kingstate/kpeg006/receiver-piezo-leads/dp/1299873). It is flat and easy to fit under inner coat.
 
-* **shottky diode** : used to protect solar panel. I use a [Nexperia 1PS76SB10](http://fr.farnell.com/nexperia/1ps76sb10/diode-schottky/dp/1081179?ost=1081179&scope=partnumberlookahead&exaMfpn=true&searchref=searchlookahead&ddkey=http%3Afr-FR%2FElement14_France%2Fw%2Fsearch)
+* **shottky diode** : used to protect solar panel. I use a [Nexperia 1PS76SB10](http://fr.farnell.com/nexperia/1ps76sb10/diode-schottky/dp/1081179?ost=1081179&scope=partnumberlookahead&exaMfpn=true&searchref=searchlookahead&ddkey=http%3Afr-FR%2FElement14_France%2Fw%2Fsearch).
 
 * **3.6 lithium ion battery**. I use a [LIR2016](http://www.eemb.com/public/image/download/LIR2016.pdf)
 
 * some capacitors and resistors (0603 package)
 
-For detailed list of components, including packages and values, see the [part list](docs/partList.txt).
+For detailed list of components, including packages and values, see the [part list](https://github.com/samp38/varioSmooth/blob/master/doc/partList.txt).
 
 ## PCB
 ![](doc/_TOP_small.png)![](doc/_BOTTOM_small.png)![](doc/_BOTTOM_reversed_small.png)![](doc/pics/top2.jpg)![](doc/pics/top.jpg)![](doc/pics/bottom.jpg)
