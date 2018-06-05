@@ -31,7 +31,7 @@ The variometer transcribes vertical speed to audio signal and must contain a pow
 
 * **shottky diode** : used to protect solar panel. I use a [Nexperia 1PS76SB10](http://fr.farnell.com/nexperia/1ps76sb10/diode-schottky/dp/1081179?ost=1081179&scope=partnumberlookahead&exaMfpn=true&searchref=searchlookahead&ddkey=http%3Afr-FR%2FElement14_France%2Fw%2Fsearch).
 
-* **3.6 lithium ion battery**. I use a [LIR2016](http://www.eemb.com/public/image/download/LIR2016.pdf)
+* **3.6 lithium ion battery**. I use a [LIR2016](http://www.eemb.com/public/image/download/LIR2016.pdf).
 
 * some capacitors and resistors (0603 package)
 
@@ -40,7 +40,7 @@ For detailed list of components, including packages and values, see the [part li
 ## PCB
 ![](doc/_TOP_small.png)![](doc/_BOTTOM_small.png)![](doc/_BOTTOM_reversed_small.png)![](doc/pics/top2.jpg)![](doc/pics/top.jpg)![](doc/pics/bottom.jpg)
 
-The schematics and GERBER files are in the [pcb folder](pcb).  [iTead](https://www.itead.cc/open-pcb/pcb-prototyping/2layer-green-pcb-5cm-x-5cm-max.html) pcb protoyping service is a good deal to get your boards (10$ for 10 pieces).
+The schematics and GERBER files are in the [pcb folder](pcb).  [iTead pcb protoyping service](https://www.itead.cc/open-pcb/pcb-prototyping/2layer-green-pcb-5cm-x-5cm-max.html) is a good deal to get your boards (10$ for 10 pieces).
 
 ## Programming the board
 ### Binary  file
