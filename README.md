@@ -47,3 +47,12 @@ The code can be found in the [MPLABX project folder](VarioSMooth.X). Microchip's
 ### Upload to the board
 The PIC can be programmed via the PGC and PGD pads on the bottom of the board. Ground and a Power must also be ok (VCC from programmer or the solar panel/battery). I used a PICKT 2, very cheap programmer for pics.
 ![](doc/pickit2-pinout.jpg)
+
+## Wiring & Using
+The following elements are to be connected to the board (bottom pads) :
+* Switch ('momentary on', i use a key switch like [this one](https://goo.gl/images/q1apYJ)). Pads **SWITCH** and **GND**.
+* Solar panel. Pads **SOL+** and **SOL-**.
+* Buzzer. Pads **BUZZ+** and **BUZZ-**.
+* Battery. Pads **BATT+** and **GND**.
+
+Once everything is set up, just get your solar panel under the sun and it should start up. Short press on button allows to start up or adjust volume, long press to shut down. A 2 minutes time out is set up in order to shut down the system if there is no move detected.
