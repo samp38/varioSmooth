@@ -5,6 +5,13 @@ This project is about buiding a simple, lightweight, energey self-sufficient and
 
 This repo containsthe sources, pcb design files (eagle format), gerber files and a few instructions to build it, including pictures and bill of materials. The firmware must be loaded into the pic, so you will need a programmer such as a PICKIT or some arduino DIY one.
 
+Key features :
+- 10mA@3V power consumption
+- 00.1 m/s detection threshold
+- n0o need to recharge or change battery
+- e0mbedded in helmet
+- 202mm x 17mm pcb size
+
 ## Electronic parts needed
 The variometer transcribes vertical speed to audio signal and must contain a power manager with a solar panel and a backup battery. Here are the comonent nedded :
 
