@@ -29,5 +29,5 @@ The variometer transcribes vertical speed to audio signal and must contain a pow
 * some capacitors and resistors (0603 package)
 
 ## PCB
-![alt text](doc/_TOP.png | width=100)
+![](doc/_TOP_small.png)![](doc/_BOTTOM_small.png)![](doc/_BOTTOM_reversed_small.png)
 
