@@ -15,15 +15,15 @@ Key features :
 ## Electronic parts needed
 The variometer transcribes vertical speed to audio signal and must contain a power manager with a solar panel and a backup battery. Here are the comonent nedded :
 
-* **MS5611** : absolute pressure sensor. [reference](http://www.te.com/usa-en/product-CAT-BLPS0036.html)
+* **[MS5611](http://www.te.com/usa-en/product-CAT-BLPS0036.html)** : absolute pressure sensor.
 
-* **PIC24F16KA101** : this microcontroller is the brain of the vario. It communicates with the pressure sensor, does all the calculations and generates the audio signal. You mest get the 20 leads SSOP package. [reference](https://www.microchip.com/wwwproducts/en/PIC24F16KA101)
+* **[PIC24F16KA101](https://www.microchip.com/wwwproducts/en/PIC24F16KA101)** : this microcontroller is the brain of the vario. It communicates with the pressure sensor, does all the calculations and generates the audio signal. You mest get the 20 leads SSOP package.
 
 * **MCP4542** : Microchip digital I2C potentiometer used to adjust audio volume. [reference](https://www.microchip.com/wwwproducts/en/MCP4542)
 
-* **ADP160** : Analog Device ultra low quiescent current ldo regulator. It supplies stabilized power to electronics. Get the 2.8 or 3V version. [reference](http://www.analog.com/en/products/power-management/ldo-linear-regulators/positive-linear-regulators/adp160.html)
+* **[ADP160](http://www.analog.com/en/products/power-management/ldo-linear-regulators/positive-linear-regulators/adp160.html)** : Analog Device ultra low quiescent current ldo regulator. It supplies stabilized power to electronics. Get the 2.8 or 3V version.
 
-* **LTC4071** : power manager. It havests solar energey and manages system load supplying/battery charging/power path handling. The current shunt limit is 50mA, so make sure your solar panel maximum current is under this value. [reference here](http://www.analog.com/media/en/technical-documentation/data-sheets/4071fc.pdf)
+* **[LTC4071](http://www.analog.com/media/en/technical-documentation/data-sheets/4071fc.pdf)** : power manager. It havests solar energey and manages system load supplying/battery charging/power path handling. The current shunt limit is 50mA, so make sure your solar panel maximum current is under this value.
 
 * **solar cell** : power supply. The system is designed for 6V/50mA max solar panel. I use two flexible 3V/12mA solar cells (ref [sp3-12](http://www.flexsolarcells.com/index_files/OEM_Components/Flex_Cells/pages/PowerFilm-Solar-OEM-00-Solar-Cell-Module-SP3-12.php)).
 
@@ -35,6 +35,8 @@ The variometer transcribes vertical speed to audio signal and must contain a pow
 
 * some capacitors and resistors (0603 package)
 
+For detailed list of components, including packages and values, see the [part list](docs/partList.txt).
+
 ## PCB
 ![](doc/_TOP_small.png)![](doc/_BOTTOM_small.png)![](doc/_BOTTOM_reversed_small.png)![](doc/pics/top2.jpg)![](doc/pics/top.jpg)![](doc/pics/bottom.jpg)
 
@@ -45,7 +47,7 @@ The schematics and GERBER files are in the [pcb folder](pcb).  [iTead](https://w
 The code can be found in the [MPLABX project folder](VarioSMooth.X). Microchip's MPLABX IDE is free, as is the XC16 compiler. If you don't feel like building it, just download the [binary file](https://github.com/samp38/varioSmooth/releases/download/v/VarioSMooth.hex) in the [releases page](https://github.com/samp38/varioSmooth/releases).
 
 ### Upload to the board
-The PIC can be programmed via the PGC and PGD pads on the bottom of the board. Ground and a Power must also be ok (VCC from programmer or the solar panel/battery). I used a PICKT 2, very cheap programmer for pics.
+The PIC can be programmed via the PGC and PGD pads on the bottom of the board. Ground and a Power must also be ok (VCC from programmer or the solar panel/battery). I used a PICKT 2, very cheap programmer for PICs.
 ![](doc/pickit2-pinout.jpg)
 
 ## Wiring & Using

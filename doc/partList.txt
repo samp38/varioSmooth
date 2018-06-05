@@ -6,22 +6,23 @@ EAGLE Version 7.3.0 Copyright (c) 1988-2015 CadSoft
 
 Assembly variant: 
 
-Part          Value                Package       Library                 Position (mm)         Orientation
+Part          Value                Package       Library                 
 
-R1            10k                  R0603         rcl                     (12.550559375 11.7048625) R0
-R2            10k                  R0603         rcl                     (13.3332 16.84024375) R0
-R3            10k                  R0603         rcl                     (1.93049375 8.624)    R270
-R4            10k                  R0603         rcl                     (14.527 18.700921875) R0
-RIN           440                  R0603         rcl                     (6.73821875 3.198834375) R270
-C1            1µ                   C0603         rcl                     (15.325384375 5.448765625) R90
-C2            100nF                C0603         rcl                     (10.789534375 9.44179375) R180
-C3            100nF                C0603         rcl                     (6.30965625 5.63725)  R180
-C4            1µ                   C0603         rcl                     (14.476334375 9.551021875) R0
-C5            1µ                   C0603         rcl                     (9.70756875 6.45908125) R270
-C6            100nF                C0603         rcl                     (11.014953125 18.66058125) R180
-D1                                 SOD323-R      diode                   (3.886615625 2.243884375) R180
-ADP160                             TSOT23-6_DDC  analog-devices          (12.39583125 6.633084375) R270
-LTC4071       LTC4071              MSOP8         linear-technology       (10.8444625 2.956909375) R270
-MCP4542       MCP4542              MSOP8         microchip               (13.2824 14.2392)     R270
-MS5611        MS5607			   MS5607-02BA03 measurement_specialties (3.890153125 7.0973375) R90
-PIC24F16KA101                      SSOP20_MC     microchip               (6.185 15.07636875)   R270
+R1            10k                  R0603         rcl                     
+R2            10k                  R0603         rcl                     
+R3            10k                  R0603         rcl                     
+R4            10k                  R0603         rcl                     
+RIN           440                  R0603         rcl                     
+C1            1µ                   C0603         rcl                     
+C2            100nF                C0603         rcl                     
+C3            100nF                C0603         rcl                     
+C4            1µ                   C0603         rcl                     
+C5            1µ                   C0603         rcl                     
+C6            100nF                C0603         rcl                     
+D1            1PS76SB10            SOD323-R      Nexperia                
+ADP160        2.8 or 3V            TSOT23-6_DDC  analog-devices          
+LTC4071       LTC4071              MSOP8         linear-technology       
+MCP4542       MCP4542              MSOP8         microchip               
+MS5611        MS5607               MS5607-02BA03 measurement_specialties 
+PIC24F16KA101                      SSOP20_MC     microchip               
+BUZZER        KPEG006                            kingstate
