@@ -47,7 +47,7 @@ The schematics and GERBER files are in the [pcb folder](pcb).  [iTead pcb protoy
 The code can be found in the [MPLABX project folder](VarioSMooth.X). Microchip's MPLABX IDE is free, as is the XC16 compiler. If you don't feel like building it, just download the [binary file](https://github.com/samp38/varioSmooth/releases/download/v/VarioSMooth.hex) in the [releases page](https://github.com/samp38/varioSmooth/releases).
 
 ### Upload to the board
-The PIC can be programmed via the PGC and PGD pads on the bottom of the board. Ground and a Power must also be ok (VCC from programmer or the solar panel/battery). I used a PICKT 2, very cheap programmer for PICs.
+The PIC can be programmed via the MCLR, PGC and PGD pads on the bottom of the board. Ground and a Power must also be ok (VCC from programmer or the solar panel/battery). I used a PICKT 2, very cheap programmer for PICs.
 ![](doc/pickit2-pinout.jpg)
 
 ## Wiring & Using
