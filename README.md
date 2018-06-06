@@ -29,7 +29,7 @@ The variometer transcribes vertical speed to audio signal and must contain a pow
 
 * **buzzer** : i like the kingstate's [KPEG006](http://uk.farnell.com/kingstate/kpeg006/receiver-piezo-leads/dp/1299873). It is flat and easy to fit under inner coat.
 
-* **shottky diode** : used to protect solar panel. I use a [Nexperia 1PS76SB10](http://fr.farnell.com/nexperia/1ps76sb10/diode-schottky/dp/1081179?ost=1081179&scope=partnumberlookahead&exaMfpn=true&searchref=searchlookahead&ddkey=http%3Afr-FR%2FElement14_France%2Fw%2Fsearch).
+* **schottky diode** : used to protect solar panel. I use a [Nexperia 1PS76SB10](http://fr.farnell.com/nexperia/1ps76sb10/diode-schottky/dp/1081179?ost=1081179&scope=partnumberlookahead&exaMfpn=true&searchref=searchlookahead&ddkey=http%3Afr-FR%2FElement14_France%2Fw%2Fsearch).
 
 * **3.6 lithium ion battery**. I use a [LIR2016](http://www.eemb.com/public/image/download/LIR2016.pdf).
 
