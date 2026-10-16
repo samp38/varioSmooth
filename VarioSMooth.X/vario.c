@@ -27,7 +27,7 @@ s16 abval(s16 val) {
      return (val<0 ? (-val) : val);
 }
 
-inline void vario_reset_shutdown_counter(void) {
+void vario_reset_shutdown_counter(void) {
     shutdown_timeout = VARIO_SHUTDOWN_COUNTER_LIMIT;
 }
 

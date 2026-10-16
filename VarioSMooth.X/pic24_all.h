@@ -40,7 +40,7 @@
 #define _PIC24_ALL_H_
 
 
-#include "p24f16ka101.h"
+#include <xc.h>     // device header selected by -mcpu (from the DFP)
 
 // added HN
 

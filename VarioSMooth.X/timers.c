@@ -88,7 +88,7 @@ void tmr3_Start(void){
     T3CONbits.TON = 1; //turn on the timer
 }
 
-inline unsigned int tmr3_Get(void) {
+unsigned int tmr3_Get(void) {
     return TMR3;
 }
 
