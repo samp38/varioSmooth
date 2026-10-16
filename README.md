@@ -58,3 +58,36 @@ The following elements are to be connected to the board (bottom pads) :
 * Battery. Pads **BATT+** and **GND**.
 
 Once everything is set up, just get your solar panel under the sun and it should start up. Short press on button allows to start up or adjust volume, long press to shut down. A 2 minutes time out is set up in order to shut down the system if there is no move detected.
+
+## Open issues
+
+### Firmware
+- [ ] **MS5611 vs MS5607 mismatch**: README says MS5611, part list / schematic say MS5607. `sensor.c` uses the MS5611 compensation formulas (`C1<<15`, `C2<<16`, `>>8`, `>>7`). If a MS5607 is fitted, compensated pressure is wrong and the speed scale is off by ~x2. Check which part is actually soldered.
+- [ ] **Overflow in `wait(2000)`** (`main.c`): `tmr1_Start(20000)` computes `20000 * FCY` = 5e9, which overflows u32 → actual wait ≈ 280 ms instead of 2 s. Harmless here (sensor needs ~3 ms after reset) but latent bug.
+- [ ] **No I2C timeout / ACK check**, and the watchdog is disabled (`ClrWdt()` calls are useless). If a device does not answer, the MCU hangs forever and drains the battery.
+- [ ] **`I2C1BRG = 0`** is out of spec (values 0 and 1 are forbidden on PIC24). Works in practice.
+- [ ] **`Idle()` is called from inside the Timer1 ISR** while `main()` spins on `Nop()`. Works thanks to wake-without-vectoring, but fragile; `Idle()` should be in the main loop.
+- [ ] **`shutdown()` is called from ISRs** (T1 timeout, CN long press). The CN ISR also busy-waits up to ~600 ms, blocking sampling.
+- [ ] Prototype mismatch: `sns_ReadAdc(s32*)` in `sensor.h` vs `sns_ReadADC(u32*)` in `sensor.c` (implicit declaration).
+- [ ] Wrong comment on `_INT0EP` (it is the edge polarity, not the priority).
+- [ ] `SPEED_INDEX_MAX 100-1` macro without parentheses.
+- [ ] Integer truncation in speed coefficient: `400/30` → 13 (2.5 % bias).
+- [ ] Shutdown timeout is 180 s in code (≈200 s effective, since speed is updated every 9 samples, not 8) vs "2 minutes" in this README.
+- [ ] No 2nd order temperature compensation, no PROM CRC check on the sensor coefficients.
+- [ ] Dead code: `DEE Emulation 16-bit.*`, `Flash Operations.s`, `utils.c`, `tmr3_callback` (T3 interrupt never enabled), commented-out linear regression, `VOL_LOW`.
+- [ ] 250 kHz clock limits: audio frequency is heavily quantized at high pitch (14 timer ticks at 2200 Hz → ~7 % steps); s64 math on a 16-bit MCU at this speed leaves little margin.
+
+### Hardware
+- [ ] **LTC4071**: NTC tied to VCC, NTCBIAS/ADJ left unconnected. To be checked against the datasheet, especially the resulting float voltage (4.0 / 4.1 / 4.2 V) applied to the LIR2016.
+- [ ] Charge current limited to ~(6 − 0.3 − 4.1) / 440 Ω ≈ 3–4 mA with RIN = 440 Ω: slow recharge vs ~1 mA consumption.
+- [ ] Programming pads are on PGC1/PGD1 but config bits say `ICS_PGx3`: programming works, in-circuit debugging does not.
+- [ ] No dedicated VDD pad for the programmer (must go through BATT+ and the LTC4071).
+- [ ] PCB link to iTead is outdated (JLCPCB / PCBWay handle the 6/6 mil, 0.3 mm drill rules fine).
+
+### Repo & documentation
+- [ ] A Mercurial `.hg/` directory is committed inside the git repo.
+- [ ] Generated files are versioned despite `.gitignore`: `build/`, `dist/` (.elf/.hex), `nbproject/private`, `disassembly/`.
+- [ ] PCB is in Eagle 7.3 format; Eagle is discontinued by Autodesk → migrate to KiCad.
+- [ ] Toolchain is aging: MPLAB X, XC16 1.26, PICkit 2.
+- [ ] Part list has encoding issues (`1µ` garbled) and the README has many typos.
+- [ ] Part sourcing: LTC4071 is expensive, MCP4542 rather specific.
