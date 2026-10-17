@@ -6,3 +6,11 @@ pcb/eagle.epf
 *.s#*
 *.l#*
 *~.*
+
+# KiCad local files
+*.kicad_prl
+*.lck
+*.bak
+*-backups/
+.history/
+fp-info-cache

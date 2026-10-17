@@ -1,0 +1,4144 @@
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid "81446026-59d7-470d-af71-8c06c28160e4")
+	(paper "A4")
+	(lib_symbols
+		(symbol "Vario 0.1 Ultra Mini-eagle-import:ADP160/161/162/163"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" ""
+				(at -12.7 22.86 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.778 1.5113)
+					)
+					(justify left bottom)
+				)
+			)
+			(property "Value" ""
+				(at -12.7 7.62 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.778 1.5113)
+					)
+					(justify left bottom)
+				)
+			)
+			(property "Footprint" "Vario 0.1 Ultra Mini:TSOT23-6_DDC"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "LDO, low Iq Linear Voltage Regulator"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_locked" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "ADP160/161/162/163_1_0"
+				(polyline
+					(pts
+						(xy -20.32 22.86) (xy -20.32 7.62)
+					)
+					(stroke
+						(width 0.254)
+						(type solid)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -20.32 7.62) (xy 5.08 7.62)
+					)
+					(stroke
+						(width 0.254)
+						(type solid)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 5.08 22.86) (xy -20.32 22.86)
+					)
+					(stroke
+						(width 0.254)
+						(type solid)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 5.08 7.62) (xy 5.08 22.86)
+					)
+					(stroke
+						(width 0.254)
+						(type solid)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(pin tri_state line
+					(at -25.4 20.32 0)
+					(length 5.08)
+					(name "VIN"
+						(effects
+							(font
+								(size 1.524 1.524)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.524 1.524)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at -25.4 15.24 0)
+					(length 5.08)
+					(name "GND"
+						(effects
+							(font
+								(size 1.524 1.524)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.524 1.524)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -25.4 10.16 0)
+					(length 5.08)
+					(name "EN"
+						(effects
+							(font
+								(size 1.524 1.524)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.524 1.524)
+							)
+						)
+					)
+				)
+				(pin no_connect line
+					(at 10.16 12.7 180)
+					(length 5.08)
+					(name "NC"
+						(effects
+							(font
+								(size 1.524 1.524)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.524 1.524)
+							)
+						)
+					)
+				)
+				(pin power_out line
+					(at 10.16 17.78 180)
+					(length 5.08)
+					(name "VOUT"
+						(effects
+							(font
+								(size 1.524 1.524)
+							)
+						)
+					)
+					(number "6"
+						(effects
+							(font
+								(size 1.524 1.524)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Vario 0.1 Ultra Mini-eagle-import:C-EUC0603"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "C"
+				(at 1.524 0.381 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.778 1.5113)
+					)
+					(justify left bottom)
+				)
+			)
+			(property "Value" ""
+				(at 1.524 -4.699 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.778 1.5113)
+					)
+					(justify left bottom)
+				)
+			)
+			(property "Footprint" "Vario 0.1 Ultra Mini:C0603"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "CAPACITOR, European symbol"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_locked" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "C-EUC0603_1_0"
+				(rectangle
+					(start -2.032 -1.016)
+					(end 2.032 -0.508)
+					(stroke
+						(width -0.0001)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(rectangle
+					(start -2.032 -2.032)
+					(end 2.032 -1.524)
+					(stroke
+						(width -0.0001)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0 0) (xy 0 -0.508)
+					)
+					(stroke
+						(width 0.1524)
+						(type solid)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0 -2.54) (xy 0 -2.032)
+					)
+					(stroke
+						(width 0.1524)
+						(type solid)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(pin passive line
+					(at 0 2.54 270)
+					(length 2.54)
+					(name "1"
+						(effects
+							(font
+								(size 0 0)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 0 0)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -5.08 90)
+					(length 2.54)
+					(name "2"
+						(effects
+							(font
+								(size 0 0)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 0 0)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Vario 0.1 Ultra Mini-eagle-import:DIODE-SOD323-R"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "D"
+				(at 2.54 0.4826 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.778 1.5113)
+					)
+					(justify left bottom)
+				)
+			)
+			(property "Value" ""
+				(at 2.54 -2.3114 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.778 1.5113)
+					)
+					(justify left bottom)
+				)
+			)
+			(property "Footprint" "Vario 0.1 Ultra Mini:SOD323-R"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "DIODE"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_locked" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "DIODE-SOD323-R_1_0"
+				(polyline
+					(pts
+						(xy -1.27 1.27) (xy -1.27 -1.27)
+					)
+					(stroke
+						(width 0.254)
+						(type solid)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -1.27 -1.27) (xy 1.27 0)
+					)
+					(stroke
+						(width 0.254)
+						(type solid)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 1.27) (xy 1.27 0)
+					)
+					(stroke
+						(width 0.254)
+						(type solid)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 0) (xy -1.27 1.27)
+					)
+					(stroke
+						(width 0.254)
+						(type solid)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 0) (xy 1.27 -1.27)
+					)
+					(stroke
+						(width 0.254)
+						(type solid)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(text "SpiceOrder 1"
+					(at -2.54 0 0)
+					(effects
+						(font
+							(size 0.4064 0.3454)
+						)
+					)
+				)
+				(text "SpiceOrder 2"
+					(at 2.54 0 0)
+					(effects
+						(font
+							(size 0.4064 0.3454)
+						)
+					)
+				)
+				(pin passive line
+					(at -2.54 0 0)
+					(length 2.54)
+					(name "A"
+						(effects
+							(font
+								(size 0 0)
+							)
+						)
+					)
+					(number "A"
+						(effects
+							(font
+								(size 0 0)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 2.54 0 180)
+					(length 2.54)
+					(name "C"
+						(effects
+							(font
+								(size 0 0)
+							)
+						)
+					)
+					(number "C"
+						(effects
+							(font
+								(size 0 0)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Vario 0.1 Ultra Mini-eagle-import:GND"
+			(power global)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "#SUPPLY"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" ""
+				(at -1.905 -3.175 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.778 1.5113)
+					)
+					(justify left bottom)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "SUPPLY SYMBOL"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_locked" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "GND_1_0"
+				(polyline
+					(pts
+						(xy -1.27 0) (xy 1.27 0)
+					)
+					(stroke
+						(width 0.254)
+						(type solid)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0 -1.27) (xy -1.27 0)
+					)
+					(stroke
+						(width 0.254)
+						(type solid)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 0) (xy 0 -1.27)
+					)
+					(stroke
+						(width 0.254)
+						(type solid)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(pin power_in line
+					(at 0 2.54 270)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 0 0)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 0 0)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Vario 0.1 Ultra Mini-eagle-import:LTC4071"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" ""
+				(at -12.7 15.24 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.778 1.5113)
+					)
+					(justify left bottom)
+				)
+			)
+			(property "Value" ""
+				(at -12.7 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.778 1.5113)
+					)
+					(justify left bottom)
+				)
+			)
+			(property "Footprint" "Vario 0.1 Ultra Mini:MSOP8"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_locked" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "LTC4071_1_0"
+				(polyline
+					(pts
+						(xy -17.78 15.24) (xy -17.78 2.54)
+					)
+					(stroke
+						(width 0.254)
+						(type solid)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -17.78 2.54) (xy 5.08 2.54)
+					)
+					(stroke
+						(width 0.254)
+						(type solid)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 5.08 15.24) (xy -17.78 15.24)
+					)
+					(stroke
+						(width 0.254)
+						(type solid)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 5.08 2.54) (xy 5.08 15.24)
+					)
+					(stroke
+						(width 0.254)
+						(type solid)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(pin input line
+					(at -22.86 12.7 0)
+					(length 5.08)
+					(name "NTCBIAS"
+						(effects
+							(font
+								(size 1.524 1.524)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.524 1.524)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -22.86 10.16 0)
+					(length 5.08)
+					(name "NTC"
+						(effects
+							(font
+								(size 1.524 1.524)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.524 1.524)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at -22.86 7.62 0)
+					(length 5.08)
+					(name "ADJ"
+						(effects
+							(font
+								(size 1.524 1.524)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.524 1.524)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at -22.86 5.08 0)
+					(length 5.08)
+					(name "HBO"
+						(effects
+							(font
+								(size 1.524 1.524)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.524 1.524)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at 10.16 5.08 180)
+					(length 5.08)
+					(name "LBSEL"
+						(effects
+							(font
+								(size 1.524 1.524)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.524 1.524)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at 10.16 7.62 180)
+					(length 5.08)
+					(name "GND"
+						(effects
+							(font
+								(size 1.524 1.524)
+							)
+						)
+					)
+					(number "6"
+						(effects
+							(font
+								(size 1.524 1.524)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at 10.16 10.16 180)
+					(length 5.08)
+					(name "BAT"
+						(effects
+							(font
+								(size 1.524 1.524)
+							)
+						)
+					)
+					(number "7"
+						(effects
+							(font
+								(size 1.524 1.524)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at 10.16 12.7 180)
+					(length 5.08)
+					(name "VCC"
+						(effects
+							(font
+								(size 1.524 1.524)
+							)
+						)
+					)
+					(number "8"
+						(effects
+							(font
+								(size 1.524 1.524)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Vario 0.1 Ultra Mini-eagle-import:R-EU_R0603"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "R"
+				(at -3.81 1.4986 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.778 1.5113)
+					)
+					(justify left bottom)
+				)
+			)
+			(property "Value" ""
+				(at -3.81 -3.302 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.778 1.5113)
+					)
+					(justify left bottom)
+				)
+			)
+			(property "Footprint" "Vario 0.1 Ultra Mini:R0603"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "RESISTOR, European symbol"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_locked" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "R-EU_R0603_1_0"
+				(polyline
+					(pts
+						(xy -2.54 -0.889) (xy -2.54 0.889)
+					)
+					(stroke
+						(width 0.254)
+						(type solid)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -2.54 -0.889) (xy 2.54 -0.889)
+					)
+					(stroke
+						(width 0.254)
+						(type solid)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 2.54 0.889) (xy -2.54 0.889)
+					)
+					(stroke
+						(width 0.254)
+						(type solid)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 2.54 -0.889) (xy 2.54 0.889)
+					)
+					(stroke
+						(width 0.254)
+						(type solid)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(pin passive line
+					(at -5.08 0 0)
+					(length 2.54)
+					(name "1"
+						(effects
+							(font
+								(size 0 0)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 0 0)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 5.08 0 180)
+					(length 2.54)
+					(name "2"
+						(effects
+							(font
+								(size 0 0)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 0 0)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Vario 0.1 Ultra Mini-eagle-import:VARIO_LIPO"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" "Vario 0.1 Ultra Mini:VARIO_LIPO"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_locked" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "VARIO_LIPO_1_0"
+				(polyline
+					(pts
+						(xy -5.08 2.54) (xy 5.08 2.54)
+					)
+					(stroke
+						(width 0.254)
+						(type solid)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -2.54 0) (xy 2.54 0)
+					)
+					(stroke
+						(width 0.254)
+						(type solid)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(pin passive line
+					(at 0 7.62 270)
+					(length 5.08)
+					(name "+"
+						(effects
+							(font
+								(size 1.524 1.524)
+							)
+						)
+					)
+					(number "P$1"
+						(effects
+							(font
+								(size 1.524 1.524)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -5.08 90)
+					(length 5.08)
+					(name "-"
+						(effects
+							(font
+								(size 1.524 1.524)
+							)
+						)
+					)
+					(number "P$2"
+						(effects
+							(font
+								(size 1.524 1.524)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Vario 0.1 Ultra Mini-eagle-import:WIREPADSMD1,27-254"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "PAD"
+				(at -1.143 1.8542 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.778 1.5113)
+					)
+					(justify left bottom)
+				)
+			)
+			(property "Value" ""
+				(at -1.143 -3.302 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.778 1.5113)
+					)
+					(justify left bottom)
+				)
+			)
+			(property "Footprint" "Vario 0.1 Ultra Mini:SMD1,27-2,54"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Wire PAD connect wire on PCB"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_locked" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "WIREPADSMD1,27-254_1_0"
+				(polyline
+					(pts
+						(xy -1.016 1.016) (xy 1.016 -1.016)
+					)
+					(stroke
+						(width 0.254)
+						(type solid)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -1.016 -1.016) (xy 1.016 1.016)
+					)
+					(stroke
+						(width 0.254)
+						(type solid)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(pin passive line
+					(at 2.54 0 180)
+					(length 2.54)
+					(name "P"
+						(effects
+							(font
+								(size 0 0)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 0 0)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "power:PWR_FLAG"
+			(power global)
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "#FLG"
+				(at 0 1.905 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "PWR_FLAG"
+				(at 0 3.81 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Special symbol for telling ERC where power comes from"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "flag power"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "PWR_FLAG_0_0"
+				(pin power_out line
+					(at 0 0 90)
+					(length 0)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(symbol "PWR_FLAG_0_1"
+				(polyline
+					(pts
+						(xy 0 0) (xy 0 1.27) (xy -1.016 1.905) (xy 0 2.54) (xy 1.016 1.905) (xy 0 1.27)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+	)
+	(text "solar panel"
+		(exclude_from_sim no)
+		(at 149.606 44.196 0)
+		(effects
+			(font
+				(size 1.778 1.5113)
+			)
+			(justify left bottom)
+		)
+		(uuid "f84357bc-17d9-4252-b78d-c49e54184ffe")
+	)
+	(junction
+		(at 208.28 71.12)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "0f035716-9778-46ab-8dc5-bf539f01d2bc")
+	)
+	(junction
+		(at 162.56 78.74)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "2a719e94-78ba-43e6-9986-5d2cd98b960f")
+	)
+	(junction
+		(at 162.56 66.04)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "2b7f79ff-6380-4cb6-a3f5-be4f3252bb83")
+	)
+	(junction
+		(at 154.94 66.04)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "83d79fa3-88b5-411d-8fb2-7c2f197f3f01")
+	)
+	(junction
+		(at 165.1 73.66)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "86df683b-6b09-459e-927a-dc8c9f11b9af")
+	)
+	(junction
+		(at 147.32 91.44)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "a5e9c16c-ec8e-45e6-9b69-5c1c89340750")
+	)
+	(junction
+		(at 147.32 96.52)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "a987547a-cc9e-4bb9-852d-2a4dd3388683")
+	)
+	(junction
+		(at 165.1 66.04)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "ec18930b-da5c-449b-8095-af4946bca0fb")
+	)
+	(junction
+		(at 147.32 83.82)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "f1d1f832-983f-4dc7-a0f3-06c2f3168360")
+	)
+	(no_connect
+		(at 111.76 91.44)
+		(uuid "21812908-bfa0-45d9-9751-8281eb4cdcd3")
+	)
+	(no_connect
+		(at 111.76 83.82)
+		(uuid "7bae47d6-9d86-4d8d-9892-856d40512427")
+	)
+	(no_connect
+		(at 111.76 88.9)
+		(uuid "bf30e4ba-7bb7-4222-b831-99ba1dbe9802")
+	)
+	(wire
+		(pts
+			(xy 208.28 81.28) (xy 208.28 83.82)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "066548ee-c4a5-4032-826e-16037cf5c05d")
+	)
+	(wire
+		(pts
+			(xy 127 60.96) (xy 127 58.42)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "0a983b1a-a721-4f1b-9535-b0ce62bf5af8")
+	)
+	(wire
+		(pts
+			(xy 129.54 58.42) (xy 129.54 66.04)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "19bf6bf4-eff3-4365-a271-0cf5254a2c2d")
+	)
+	(wire
+		(pts
+			(xy 165.1 66.04) (xy 167.64 66.04)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "1b424898-890e-4f82-98c1-cdfe700de5d2")
+	)
+	(wire
+		(pts
+			(xy 208.28 71.12) (xy 210.82 71.12)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "2038261d-1812-4ffc-9261-d8967d8b5c66")
+	)
+	(wire
+		(pts
+			(xy 129.54 66.04) (xy 132.08 66.04)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "25c80668-c847-45ad-a689-a627f13d64fb")
+	)
+	(wire
+		(pts
+			(xy 162.56 78.74) (xy 162.56 66.04)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "3209cb4a-2463-4988-8ebd-8fdd5cca4061")
+	)
+	(wire
+		(pts
+			(xy 175.26 109.22) (xy 160.02 109.22)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "3bc731b4-7f6a-422f-8b58-65f11374f78c")
+	)
+	(wire
+		(pts
+			(xy 165.1 73.66) (xy 167.64 73.66)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "44540823-d694-4a2c-8e97-37763e5f0517")
+	)
+	(wire
+		(pts
+			(xy 162.56 66.04) (xy 165.1 66.04)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "4f41617b-105b-494d-aaa9-15b2e5f437ff")
+	)
+	(wire
+		(pts
+			(xy 147.32 96.52) (xy 147.32 101.6)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "572490d8-bb34-4e0a-8888-c872461fede0")
+	)
+	(wire
+		(pts
+			(xy 147.32 91.44) (xy 147.32 96.52)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "59c48c0f-1632-4b8a-86e6-8e57d2af270c")
+	)
+	(wire
+		(pts
+			(xy 109.22 86.36) (xy 109.22 73.66)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "63c21d37-28a0-4359-8a04-833c446232f4")
+	)
+	(wire
+		(pts
+			(xy 165.1 59.69) (xy 165.1 66.04)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "65002bcc-0b69-4f99-9de6-77c59c7fa9e4")
+	)
+	(wire
+		(pts
+			(xy 147.32 73.66) (xy 147.32 83.82)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "7a611f8c-b001-46c4-a19e-323c74873788")
+	)
+	(wire
+		(pts
+			(xy 152.4 66.04) (xy 154.94 66.04)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "7ac32f1d-74c8-49aa-9e61-658f20d7964a")
+	)
+	(wire
+		(pts
+			(xy 175.26 104.14) (xy 175.26 109.22)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "81f5dcf5-135f-48a7-a26a-2198f01854dc")
+	)
+	(wire
+		(pts
+			(xy 137.16 66.04) (xy 142.24 66.04)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "83075ca8-751f-47f4-ad7c-9cf0ab1513c4")
+	)
+	(wire
+		(pts
+			(xy 144.78 91.44) (xy 147.32 91.44)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "8c6c646e-7965-4cc9-922c-658f78bfdab0")
+	)
+	(wire
+		(pts
+			(xy 144.78 86.36) (xy 175.26 86.36)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "98dcc7de-3d1f-482d-aa5c-bbeb1688fd5f")
+	)
+	(wire
+		(pts
+			(xy 111.76 60.96) (xy 127 60.96)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "99fa718f-ca6d-41b9-adfd-b4995bf627d6")
+	)
+	(wire
+		(pts
+			(xy 109.22 73.66) (xy 147.32 73.66)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "9c902623-8d74-4e12-b3e1-58db929f5566")
+	)
+	(wire
+		(pts
+			(xy 124.46 58.42) (xy 124.46 53.34)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "b3e76bb3-6207-4f41-914e-a079da3dc8bb")
+	)
+	(wire
+		(pts
+			(xy 162.56 83.82) (xy 162.56 78.74)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "ba43a306-e380-4cf0-8a09-41cfbdf698ab")
+	)
+	(wire
+		(pts
+			(xy 203.2 71.12) (xy 208.28 71.12)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "bc5ddca0-d884-4e7a-b188-b3916a1bf281")
+	)
+	(wire
+		(pts
+			(xy 160.02 96.52) (xy 147.32 96.52)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "bccc718d-8c2e-4ec2-8afe-9d350016e1e4")
+	)
+	(wire
+		(pts
+			(xy 175.26 86.36) (xy 175.26 91.44)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "c0bc753c-3620-4d64-8bc5-067d3780150b")
+	)
+	(wire
+		(pts
+			(xy 167.64 78.74) (xy 162.56 78.74)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "c0fe3f3c-c124-4af2-bcd4-b25f05f67575")
+	)
+	(wire
+		(pts
+			(xy 132.08 58.42) (xy 132.08 53.34)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "c799a92b-1453-4f06-80b0-942bf0bb95bf")
+	)
+	(wire
+		(pts
+			(xy 111.76 86.36) (xy 109.22 86.36)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "ce6e420e-3627-4f2a-a3c2-a9a462921d29")
+	)
+	(wire
+		(pts
+			(xy 147.32 91.44) (xy 147.32 88.9)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "d651a4f3-4675-4525-bb09-24ccca3b3622")
+	)
+	(wire
+		(pts
+			(xy 160.02 109.22) (xy 160.02 96.52)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "d873edbf-26e0-470e-87fc-23504019c4ee")
+	)
+	(wire
+		(pts
+			(xy 154.94 68.58) (xy 154.94 66.04)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "d95011ac-8797-4f82-a39c-6505ad90b031")
+	)
+	(wire
+		(pts
+			(xy 144.78 83.82) (xy 147.32 83.82)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "de9c0866-9ef4-4347-9fa2-e98b3b259cd4")
+	)
+	(wire
+		(pts
+			(xy 154.94 66.04) (xy 162.56 66.04)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "e244c691-8062-4f3c-a389-d4d2a2838de2")
+	)
+	(wire
+		(pts
+			(xy 167.64 66.04) (xy 167.64 68.58)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "e5db7f2c-538f-4208-a335-6b7dda658342")
+	)
+	(wire
+		(pts
+			(xy 147.32 83.82) (xy 162.56 83.82)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "eea2e377-01dd-4df3-8fa7-add1960e1fd8")
+	)
+	(wire
+		(pts
+			(xy 129.54 58.42) (xy 132.08 58.42)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "efc39fd5-7996-4f0a-b53e-e4395c066aa3")
+	)
+	(wire
+		(pts
+			(xy 127 58.42) (xy 124.46 58.42)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "f24d31fc-a8e8-4ce3-b4b5-bf74145ee2c2")
+	)
+	(wire
+		(pts
+			(xy 147.32 88.9) (xy 144.78 88.9)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "fa3ae940-7c04-48ea-9b62-63ccfe356958")
+	)
+	(wire
+		(pts
+			(xy 208.28 73.66) (xy 208.28 71.12)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "fb72cdbf-8ae9-4f95-9332-6838c1558bf6")
+	)
+	(global_label "BUZZER+"
+		(shape bidirectional)
+		(at 142.24 134.62 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.2446 1.2446)
+			)
+			(justify right)
+		)
+		(uuid "000b2f7e-bc53-4dc8-9376-fdc0e325e1a1")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 142.24 147.4649 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "PGC"
+		(shape bidirectional)
+		(at 81.28 134.62 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.2446 1.2446)
+			)
+			(justify right)
+		)
+		(uuid "04d035dc-55ae-4c6d-a444-04e32fcfd69d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 81.28 142.368 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "MCLR"
+		(shape bidirectional)
+		(at 73.66 134.62 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.2446 1.2446)
+			)
+			(justify right)
+		)
+		(uuid "13d49d07-4259-4755-b45d-68fd70658007")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 73.66 143.5533 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "GND"
+		(shape bidirectional)
+		(at 96.52 134.62 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.2446 1.2446)
+			)
+			(justify right)
+		)
+		(uuid "203a4c3e-b894-4707-b8cf-a17d24fb7aa1")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 96.52 142.4273 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "TO_REGULATOR"
+		(shape bidirectional)
+		(at 165.1 59.69 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.2446 1.2446)
+			)
+			(justify left)
+		)
+		(uuid "5e788583-341d-44be-9d08-13bd18e29bb7")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 182.805 59.69 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(global_label "PGD"
+		(shape bidirectional)
+		(at 88.9 134.62 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.2446 1.2446)
+			)
+			(justify right)
+		)
+		(uuid "7e016244-5945-405b-ade0-b7e6e3929ccf")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 88.9 142.368 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "SYS_LOAD"
+		(shape bidirectional)
+		(at 210.82 71.12 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.2446 1.2446)
+			)
+			(justify left)
+		)
+		(uuid "a687f947-44e8-4e8d-ada3-f23f1552c254")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 223.8427 71.12 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(global_label "SWITCH_WIRE"
+		(shape bidirectional)
+		(at 119.38 134.62 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.2446 1.2446)
+			)
+			(justify right)
+		)
+		(uuid "ad0d8362-13d2-487a-a943-059414fe0215")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 119.38 150.6655 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "BUZZER-"
+		(shape bidirectional)
+		(at 149.86 134.62 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.2446 1.2446)
+			)
+			(justify right)
+		)
+		(uuid "dce21841-b2cd-409e-9f63-7083fdb5e059")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 149.86 147.4649 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "GND"
+		(shape bidirectional)
+		(at 127 134.62 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.2446 1.2446)
+			)
+			(justify right)
+		)
+		(uuid "fd220375-5849-48f1-85a9-b4d61c672cab")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 127 142.4273 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:PWR_FLAG")
+		(at 111.76 60.96 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "1b612c28-7f66-4de0-8070-4e2f606708f6")
+		(property "Reference" "#FLG01"
+			(at 111.76 57.15 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "PWR_FLAG"
+			(at 111.76 64.77 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 111.76 60.96 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 111.76 60.96 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Special symbol for telling ERC where power comes from"
+			(at 111.76 60.96 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "c4e6403f-5e21-4950-a1ba-8f47d0f8f9c4")
+		)
+		(instances
+			(project "varioSmooth_v1"
+				(path "/7511b889-bf55-415f-93f1-373dc1cf5f1b"
+					(reference "#FLG01")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Vario 0.1 Ultra Mini-eagle-import:WIREPADSMD1,27-254")
+		(at 119.38 132.08 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "2a614c2a-5709-46fe-8da1-7fc463b184b7")
+		(property "Reference" "SWITCH0"
+			(at 121.2342 130.937 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Value" "WIREPADSMD1,27-254"
+			(at 116.078 130.937 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Footprint" "Vario 0.1 Ultra Mini-import-fps:SMD1,27-2,54"
+			(at 119.38 132.08 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 119.38 132.08 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Wire PAD connect wire on PCB"
+			(at 119.38 132.08 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "061a3565-4d03-4b05-83d0-74da71f13015")
+		)
+		(instances
+			(project "varioSmooth_v1"
+				(path "/7511b889-bf55-415f-93f1-373dc1cf5f1b"
+					(reference "SWITCH0")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Vario 0.1 Ultra Mini-eagle-import:GND")
+		(at 147.32 104.14 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "2baa372f-77ee-4150-b027-b34607c99aa3")
+		(property "Reference" "#SUPPLY1"
+			(at 147.32 104.14 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 145.415 107.315 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Footprint" ""
+			(at 147.32 104.14 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 147.32 104.14 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "SUPPLY SYMBOL"
+			(at 147.32 104.14 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "e2be9f01-679b-4975-9902-b4cdfd88a8eb")
+		)
+		(instances
+			(project "varioSmooth_v1"
+				(path "/7511b889-bf55-415f-93f1-373dc1cf5f1b"
+					(reference "#SUPPLY1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Vario 0.1 Ultra Mini-eagle-import:WIREPADSMD1,27-254")
+		(at 149.86 132.08 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "2f8cbd73-6c8e-4e22-9a21-a1bcbbf4ddb2")
+		(property "Reference" "BUZZ-0"
+			(at 151.7142 130.937 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Value" "WIREPADSMD1,27-254"
+			(at 146.558 130.937 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Footprint" "Vario 0.1 Ultra Mini-import-fps:SMD1,27-2,54"
+			(at 149.86 132.08 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 149.86 132.08 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Wire PAD connect wire on PCB"
+			(at 149.86 132.08 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "3e1f4323-1222-4f61-bac5-520d77ed0977")
+		)
+		(instances
+			(project "varioSmooth_v1"
+				(path "/7511b889-bf55-415f-93f1-373dc1cf5f1b"
+					(reference "BUZZ-0")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Vario 0.1 Ultra Mini-eagle-import:WIREPADSMD1,27-254")
+		(at 127 132.08 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "3cf98acb-f3af-417a-bd3e-dbb297cdcc80")
+		(property "Reference" "SOL-0"
+			(at 128.8542 130.937 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Value" "WIREPADSMD1,27-254"
+			(at 123.698 130.937 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Footprint" "Vario 0.1 Ultra Mini-import-fps:SMD1,27-2,54"
+			(at 127 132.08 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 127 132.08 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Wire PAD connect wire on PCB"
+			(at 127 132.08 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "476b8097-0d56-44cd-bee8-94d6eca386c8")
+		)
+		(instances
+			(project "varioSmooth_v1"
+				(path "/7511b889-bf55-415f-93f1-373dc1cf5f1b"
+					(reference "SOL-0")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Vario 0.1 Ultra Mini-eagle-import:WIREPADSMD1,27-254")
+		(at 81.28 132.08 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "3e4be34e-5ea9-47d0-a361-d4bc2ee87596")
+		(property "Reference" "PGC0"
+			(at 83.1342 130.937 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Value" "WIREPADSMD1,27-254"
+			(at 77.978 130.937 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Footprint" "Vario 0.1 Ultra Mini-import-fps:SMD1,27-2,54"
+			(at 81.28 132.08 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 81.28 132.08 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Wire PAD connect wire on PCB"
+			(at 81.28 132.08 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "a293df57-ce4e-432c-84ea-8d81d4c39b2f")
+		)
+		(instances
+			(project "varioSmooth_v1"
+				(path "/7511b889-bf55-415f-93f1-373dc1cf5f1b"
+					(reference "PGC0")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Vario 0.1 Ultra Mini-eagle-import:DIODE-SOD323-R")
+		(at 134.62 66.04 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "401d8340-278f-4b27-8d8a-4e8f31c64938")
+		(property "Reference" "D1"
+			(at 137.16 65.5574 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Value" "DIODE-SOD323-R"
+			(at 137.16 68.3514 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Footprint" "Vario 0.1 Ultra Mini-import-fps:SOD323-R"
+			(at 134.62 66.04 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 134.62 66.04 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "DIODE"
+			(at 134.62 66.04 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "A"
+			(uuid "bee3b38e-b2f4-4cca-9031-4ba3bd5a9025")
+		)
+		(pin "C"
+			(uuid "eb6c3fe4-97aa-4dd8-bcb4-c361d68f62cf")
+		)
+		(instances
+			(project "varioSmooth_v1"
+				(path "/7511b889-bf55-415f-93f1-373dc1cf5f1b"
+					(reference "D1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Vario 0.1 Ultra Mini-eagle-import:WIREPADSMD1,27-254")
+		(at 73.66 132.08 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "4861ce50-9974-4483-8e9c-2e97682811d8")
+		(property "Reference" "MCLR0"
+			(at 75.5142 130.937 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Value" "WIREPADSMD1,27-254"
+			(at 70.358 130.937 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Footprint" "Vario 0.1 Ultra Mini-import-fps:SMD1,27-2,54"
+			(at 73.66 132.08 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 73.66 132.08 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Wire PAD connect wire on PCB"
+			(at 73.66 132.08 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "6d3b0232-cff6-46f2-9766-97527d70af0f")
+		)
+		(instances
+			(project "varioSmooth_v1"
+				(path "/7511b889-bf55-415f-93f1-373dc1cf5f1b"
+					(reference "MCLR0")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Vario 0.1 Ultra Mini-eagle-import:C-EUC0603")
+		(at 154.94 71.12 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "4a684b84-f792-447a-8bbc-89a500c62b3c")
+		(property "Reference" "C1"
+			(at 156.464 70.739 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Value" "1µ"
+			(at 156.464 75.819 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Footprint" "Vario 0.1 Ultra Mini-import-fps:C0603"
+			(at 154.94 71.12 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 154.94 71.12 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "CAPACITOR, European symbol"
+			(at 154.94 71.12 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "6369c0fd-f141-4ad0-a473-814fd55142c7")
+		)
+		(pin "2"
+			(uuid "e09a8808-007f-4b48-93b6-17a7ee2bc067")
+		)
+		(instances
+			(project "varioSmooth_v1"
+				(path "/7511b889-bf55-415f-93f1-373dc1cf5f1b"
+					(reference "C1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Vario 0.1 Ultra Mini-eagle-import:C-EUC0603")
+		(at 208.28 76.2 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "4dc7a15e-df53-4d03-a639-ab41d14318f5")
+		(property "Reference" "C4"
+			(at 209.804 75.819 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Value" "1µ"
+			(at 209.804 80.899 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Footprint" "Vario 0.1 Ultra Mini-import-fps:C0603"
+			(at 208.28 76.2 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 208.28 76.2 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "CAPACITOR, European symbol"
+			(at 208.28 76.2 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "54a5d875-c83c-41ff-9cce-c178bd37d034")
+		)
+		(pin "2"
+			(uuid "01728efb-4d68-436f-940a-4d07377b9ada")
+		)
+		(instances
+			(project "varioSmooth_v1"
+				(path "/7511b889-bf55-415f-93f1-373dc1cf5f1b"
+					(reference "C4")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Vario 0.1 Ultra Mini-eagle-import:ADP160/161/162/163")
+		(at 193.04 88.9 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "4e4c78ad-c2d0-4505-99b1-ccf39fd8a2a8")
+		(property "Reference" "ADP160"
+			(at 180.34 66.04 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Value" "ADP160/161/162/163"
+			(at 180.34 81.28 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Footprint" "Vario 0.1 Ultra Mini-import-fps:TSOT23-6_DDC"
+			(at 193.04 88.9 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 193.04 88.9 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "LDO, low Iq Linear Voltage Regulator"
+			(at 193.04 88.9 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "c7dadcf0-815f-4166-bfcf-0a27a921e3db")
+		)
+		(pin "2"
+			(uuid "0d15daf6-e982-4b65-9e78-2f96037e2931")
+		)
+		(pin "3"
+			(uuid "d09d7676-2a70-4cbf-9e62-bcf6f90b184e")
+		)
+		(pin "4"
+			(uuid "ae40be49-76fc-4816-9a14-fd72cf885e4d")
+		)
+		(pin "6"
+			(uuid "16db75e6-3844-4080-b714-b3f3db5aca6e")
+		)
+		(instances
+			(project "varioSmooth_v1"
+				(path "/7511b889-bf55-415f-93f1-373dc1cf5f1b"
+					(reference "ADP160")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Vario 0.1 Ultra Mini-eagle-import:WIREPADSMD1,27-254")
+		(at 142.24 132.08 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "554672e6-d822-4499-a5f8-148fffc3d6e9")
+		(property "Reference" "BUZZ+0"
+			(at 144.0942 130.937 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Value" "WIREPADSMD1,27-254"
+			(at 138.938 130.937 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Footprint" "Vario 0.1 Ultra Mini-import-fps:SMD1,27-2,54"
+			(at 142.24 132.08 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 142.24 132.08 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Wire PAD connect wire on PCB"
+			(at 142.24 132.08 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "252c49d7-788f-478a-8c2a-375b1f0f0242")
+		)
+		(instances
+			(project "varioSmooth_v1"
+				(path "/7511b889-bf55-415f-93f1-373dc1cf5f1b"
+					(reference "BUZZ+0")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Vario 0.1 Ultra Mini-eagle-import:WIREPADSMD1,27-254")
+		(at 132.08 50.8 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "62d2d303-9c8f-4711-9ee8-1725f7867828")
+		(property "Reference" "SOL+0"
+			(at 133.9342 49.657 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Value" "WIREPADSMD1,27-254"
+			(at 128.778 49.657 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify right bottom)
+			)
+		)
+		(property "Footprint" "Vario 0.1 Ultra Mini-import-fps:SMD1,27-2,54"
+			(at 132.08 50.8 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 132.08 50.8 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Wire PAD connect wire on PCB"
+			(at 132.08 50.8 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "d2eb652a-ee9f-4787-a11e-3e550bb10988")
+		)
+		(instances
+			(project "varioSmooth_v1"
+				(path "/7511b889-bf55-415f-93f1-373dc1cf5f1b"
+					(reference "SOL+0")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Vario 0.1 Ultra Mini-eagle-import:R-EU_R0603")
+		(at 147.32 66.04 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "650e09f0-290f-460d-9426-5803203452f5")
+		(property "Reference" "RIN0"
+			(at 143.51 64.5414 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Value" "440"
+			(at 143.51 69.342 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Footprint" "Vario 0.1 Ultra Mini-import-fps:R0603"
+			(at 147.32 66.04 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 147.32 66.04 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "RESISTOR, European symbol"
+			(at 147.32 66.04 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "46851f5e-8ff6-41f1-8785-37126a221062")
+		)
+		(pin "2"
+			(uuid "9487bba6-364c-47b2-b316-7f9cdb647d17")
+		)
+		(instances
+			(project "varioSmooth_v1"
+				(path "/7511b889-bf55-415f-93f1-373dc1cf5f1b"
+					(reference "RIN0")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Vario 0.1 Ultra Mini-eagle-import:LTC4071")
+		(at 134.62 96.52 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "67220045-39aa-4077-8717-349e331dd6c0")
+		(property "Reference" "LTC4071"
+			(at 121.92 81.28 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Value" "LTC4071"
+			(at 121.92 96.52 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Footprint" "Vario 0.1 Ultra Mini-import-fps:MSOP8"
+			(at 134.62 96.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 134.62 96.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 134.62 96.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "90cfa596-39b9-4138-a81f-e8c1f7e36bbd")
+		)
+		(pin "2"
+			(uuid "caacf797-2693-41ac-b75d-255e3c2efa41")
+		)
+		(pin "3"
+			(uuid "11e9e665-4924-4aef-b108-d8dc5a3541dd")
+		)
+		(pin "4"
+			(uuid "d93ec50f-9732-4845-a561-a3d02fe34cdd")
+		)
+		(pin "5"
+			(uuid "5d6b5a01-e5ea-4620-8ec8-f429e6cb2101")
+		)
+		(pin "6"
+			(uuid "086ba67c-effd-4c86-a0ab-f8f9a6766b68")
+		)
+		(pin "7"
+			(uuid "2ec9aee8-4c0a-45cf-9f20-64ea5d4e4517")
+		)
+		(pin "8"
+			(uuid "c0fb03e1-6e92-4c3d-b841-00d43b87e78c")
+		)
+		(instances
+			(project "varioSmooth_v1"
+				(path "/7511b889-bf55-415f-93f1-373dc1cf5f1b"
+					(reference "LTC4071")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Vario 0.1 Ultra Mini-eagle-import:WIREPADSMD1,27-254")
+		(at 96.52 132.08 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "822e1fa7-3ac6-44a3-ba86-22d8bc821d60")
+		(property "Reference" "GND@2"
+			(at 98.3742 130.937 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Value" "WIREPADSMD1,27-254"
+			(at 93.218 130.937 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Footprint" "Vario 0.1 Ultra Mini-import-fps:SMD1,27-2,54"
+			(at 96.52 132.08 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 96.52 132.08 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Wire PAD connect wire on PCB"
+			(at 96.52 132.08 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "9c2b28c2-46fb-4ea8-96ea-8caca0168e7e")
+		)
+		(instances
+			(project "varioSmooth_v1"
+				(path "/7511b889-bf55-415f-93f1-373dc1cf5f1b"
+					(reference "GND@2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Vario 0.1 Ultra Mini-eagle-import:VARIO_LIPO")
+		(at 175.26 99.06 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "88bf7376-e7ae-4456-afc3-d7d7aff632d9")
+		(property "Reference" "BATT+0"
+			(at 175.26 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "VARIO_LIPO"
+			(at 175.26 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Vario 0.1 Ultra Mini-import-fps:VARIO_LIPO"
+			(at 175.26 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 175.26 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 175.26 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "P$1"
+			(uuid "6e1854d6-d926-4ec3-b27f-45e156d6657c")
+		)
+		(pin "P$2"
+			(uuid "3f5bdd7b-a896-46b7-aa2b-f0a02e02fa7f")
+		)
+		(instances
+			(project "varioSmooth_v1"
+				(path "/7511b889-bf55-415f-93f1-373dc1cf5f1b"
+					(reference "BATT+0")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Vario 0.1 Ultra Mini-eagle-import:C-EUC0603")
+		(at 165.1 68.58 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "8f12a2b1-eb58-47cb-9fd1-d820dcbbf353")
+		(property "Reference" "C5"
+			(at 166.624 68.199 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Value" "1µ"
+			(at 166.624 73.279 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Footprint" "Vario 0.1 Ultra Mini-import-fps:C0603"
+			(at 165.1 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 165.1 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "CAPACITOR, European symbol"
+			(at 165.1 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "7710d1ac-d062-499d-843c-a998ae6ab7b3")
+		)
+		(pin "2"
+			(uuid "201b9d1e-7a10-4c1c-a97a-d2a9274b9783")
+		)
+		(instances
+			(project "varioSmooth_v1"
+				(path "/7511b889-bf55-415f-93f1-373dc1cf5f1b"
+					(reference "C5")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Vario 0.1 Ultra Mini-eagle-import:GND")
+		(at 165.1 76.2 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "9206d34e-1d22-4727-a84c-37e343070854")
+		(property "Reference" "#SUPPLY14"
+			(at 165.1 76.2 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 163.195 79.375 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Footprint" ""
+			(at 165.1 76.2 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 165.1 76.2 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "SUPPLY SYMBOL"
+			(at 165.1 76.2 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "d0a9b364-f03c-4bed-89e5-3874ed7be845")
+		)
+		(instances
+			(project "varioSmooth_v1"
+				(path "/7511b889-bf55-415f-93f1-373dc1cf5f1b"
+					(reference "#SUPPLY14")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Vario 0.1 Ultra Mini-eagle-import:GND")
+		(at 154.94 78.74 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "9b357b5a-77b7-49fb-8cfe-8728f64d89dd")
+		(property "Reference" "#SUPPLY3"
+			(at 154.94 78.74 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 153.035 81.915 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Footprint" ""
+			(at 154.94 78.74 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 154.94 78.74 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "SUPPLY SYMBOL"
+			(at 154.94 78.74 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "71c7d2ce-271d-405f-a649-dc87699a0125")
+		)
+		(instances
+			(project "varioSmooth_v1"
+				(path "/7511b889-bf55-415f-93f1-373dc1cf5f1b"
+					(reference "#SUPPLY3")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Vario 0.1 Ultra Mini-eagle-import:GND")
+		(at 208.28 86.36 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "9d922f48-a1cd-45d0-b992-df37d3bc7a7b")
+		(property "Reference" "#SUPPLY15"
+			(at 208.28 86.36 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 206.375 89.535 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Footprint" ""
+			(at 208.28 86.36 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 208.28 86.36 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "SUPPLY SYMBOL"
+			(at 208.28 86.36 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "7fdd2336-8059-4111-ab85-533fcda8c2c3")
+		)
+		(instances
+			(project "varioSmooth_v1"
+				(path "/7511b889-bf55-415f-93f1-373dc1cf5f1b"
+					(reference "#SUPPLY15")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Vario 0.1 Ultra Mini-eagle-import:WIREPADSMD1,27-254")
+		(at 88.9 132.08 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "cf4c9e80-1ce7-48b7-a73e-9d736594eac4")
+		(property "Reference" "PGD0"
+			(at 90.7542 130.937 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Value" "WIREPADSMD1,27-254"
+			(at 85.598 130.937 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Footprint" "Vario 0.1 Ultra Mini-import-fps:SMD1,27-2,54"
+			(at 88.9 132.08 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 88.9 132.08 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Wire PAD connect wire on PCB"
+			(at 88.9 132.08 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "c6ee6f68-76b1-4c12-b5f6-3584c1f43ff1")
+		)
+		(instances
+			(project "varioSmooth_v1"
+				(path "/7511b889-bf55-415f-93f1-373dc1cf5f1b"
+					(reference "PGD0")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Vario 0.1 Ultra Mini-eagle-import:GND")
+		(at 111.76 63.5 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "d226d348-6f7d-463d-8eb2-22e6a07b88ee")
+		(property "Reference" "#SUPPLY2"
+			(at 111.76 63.5 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 109.855 66.675 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Footprint" ""
+			(at 111.76 63.5 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 111.76 63.5 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "SUPPLY SYMBOL"
+			(at 111.76 63.5 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "9309e03c-25cc-4a4f-bb1c-85ed91b23479")
+		)
+		(instances
+			(project "varioSmooth_v1"
+				(path "/7511b889-bf55-415f-93f1-373dc1cf5f1b"
+					(reference "#SUPPLY2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Vario 0.1 Ultra Mini-eagle-import:WIREPADSMD1,27-254")
+		(at 124.46 50.8 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "da32c74b-a864-47e7-bd67-85ba66a9262a")
+		(property "Reference" "GND@1"
+			(at 126.3142 49.657 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Value" "WIREPADSMD1,27-254"
+			(at 121.158 49.657 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify right bottom)
+			)
+		)
+		(property "Footprint" "Vario 0.1 Ultra Mini-import-fps:SMD1,27-2,54"
+			(at 124.46 50.8 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 124.46 50.8 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Wire PAD connect wire on PCB"
+			(at 124.46 50.8 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "f51189ff-6790-4c7c-a91c-4762a73dfec0")
+		)
+		(instances
+			(project "varioSmooth_v1"
+				(path "/7511b889-bf55-415f-93f1-373dc1cf5f1b"
+					(reference "GND@1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(sheet_instances
+		(path "/"
+			(page "1")
+		)
+	)
+	(embedded_fonts no)
+)
