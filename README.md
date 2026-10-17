@@ -62,13 +62,14 @@ Once everything is set up, just get your solar panel under the sun and it should
 ## Open issues
 
 ### Firmware
+- [x] **False speed spike around 983 mbar (~250 m altitude)**: `vario.c` called `filterPressure()` and `speedIIRFilter()` without including `filters.h`. The implicit declaration returns a 16-bit `int` on XC16, so the filtered pressure (s32, in 0.01 mbar) was truncated to its low 16 bits and sign-extended. When the pressure crossed 983.04 mbar (0x18000) the stored value jumped by 65536, which the vario read as a huge vertical speed for a moment: the vario went crazy briefly when landing in the plains. Fixed by adding the missing includes (`filters.h` in `vario.c`, `timers.h` in `audio.c`) and correcting the prototypes in `timers.h` and `sensor.h`; the firmware now builds with `-Werror=implicit-function-declaration`.
 - [ ] **MS5611 vs MS5607 mismatch**: README says MS5611, part list / schematic say MS5607. `sensor.c` uses the MS5611 compensation formulas (`C1<<15`, `C2<<16`, `>>8`, `>>7`). If a MS5607 is fitted, compensated pressure is wrong and the speed scale is off by ~x2. Check which part is actually soldered.
 - [ ] **Overflow in `wait(2000)`** (`main.c`): `tmr1_Start(20000)` computes `20000 * FCY` = 5e9, which overflows u32 → actual wait ≈ 280 ms instead of 2 s. Harmless here (sensor needs ~3 ms after reset) but latent bug.
 - [ ] **No I2C timeout / ACK check**, and the watchdog is disabled (`ClrWdt()` calls are useless). If a device does not answer, the MCU hangs forever and drains the battery.
 - [ ] **`I2C1BRG = 0`** is out of spec (values 0 and 1 are forbidden on PIC24). Works in practice.
 - [ ] **`Idle()` is called from inside the Timer1 ISR** while `main()` spins on `Nop()`. Works thanks to wake-without-vectoring, but fragile; `Idle()` should be in the main loop.
 - [ ] **`shutdown()` is called from ISRs** (T1 timeout, CN long press). The CN ISR also busy-waits up to ~600 ms, blocking sampling.
-- [ ] Prototype mismatch: `sns_ReadAdc(s32*)` in `sensor.h` vs `sns_ReadADC(u32*)` in `sensor.c` (implicit declaration).
+- [x] Prototype mismatch: `sns_ReadAdc(s32*)` in `sensor.h` vs `sns_ReadADC(u32*)` in `sensor.c` (implicit declaration).
 - [ ] Wrong comment on `_INT0EP` (it is the edge polarity, not the priority).
 - [ ] `SPEED_INDEX_MAX 100-1` macro without parentheses.
 - [ ] Integer truncation in speed coefficient: `400/30` → 13 (2.5 % bias).

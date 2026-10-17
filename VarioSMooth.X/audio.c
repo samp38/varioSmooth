@@ -1,5 +1,6 @@
 #include "pic24_all.h"
 #include "i2c.h"
+#include "timers.h"
 
 // MCP4542 has a 7 bits resolution between 0 and Rmax (10kOhms here)
 #define I2C_ID_MCP4542 ((u8)0b01011000)

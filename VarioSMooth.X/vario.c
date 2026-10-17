@@ -3,6 +3,7 @@
 #include "vario.h"
 #include "audio_response.h"
 #include "button.h"
+#include "filters.h"
 
 #define BEEP_DESCENT_PERIOD 500
 #define SPEED_THRESHOLD 10

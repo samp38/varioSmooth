@@ -20,7 +20,7 @@ void  sns_CompensateTemperature(u32);
 s32  sns_CompensatePressure(u32);
 void sns_TriggerTemperatureSample(void);
 void sns_TriggerPressureSample(void);
-void sns_ReadAdc(s32 *);
+void sns_ReadADC(u32 *);
 
 #endif	/* SENSOR_H */
 

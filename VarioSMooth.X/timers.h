@@ -21,7 +21,7 @@ void tmr1_Stop();
 
 //// TIMER 2 : beep driver
 void tmr2_Config(void);
-void tmr2_Start(void);
+void tmr2_Start(u16 ticks);
 void tmr2_Stop(void);
 
 //// TIMER 3 : simple counter
