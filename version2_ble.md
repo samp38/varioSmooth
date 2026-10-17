@@ -54,11 +54,62 @@ Vérifié dans le code source de LK8000 (`android/src/org/LK8000/BluetoothGattCl
 - Page **Web Bluetooth** (Chrome Android/desktop) plutôt qu'une app native : rien à publier ni maintenir.
 - Commandes texte via le même canal série BLE (FFE0/FFE1).
 
+## Bloc d'alimentation (figé le 2026-10-17)
+
+```
+SP3-12 ─ SP3-12 ── D1 (Schottky) ── RIN (0 Ω) ──┬── VCC ── VDDH (MDBT50Q) ── REG0 DC/DC ── VDD 3,0 V ── MS5611, buzzer
+   (série, côte à côte sur le dessus)             │
+                                    LTC4071 (shunt)── BAT ── LiPo   (NTC 10k collée à la batterie)
+```
+
+### Chargeur : LTC4071 (shunt, MSOP8 ou DFN 2 × 3 mm), comme la v1
+Le **BQ25505** (MPPT) a été envisagé puis écarté. Les cellules sont côte à côte sur le dessus du casque, donc à l'ombre ensemble : la série ne pénalise pas. Et avec RIN ≈ 0, le LTC4071 récupère déjà ~75 % de la puissance des cellules, contre ~80–85 % pour le BQ25505 (estimations, non mesurées). Ce faible gain ne justifiait pas :
+- l'abandon de la **coupure batterie basse intégrée** (le BQ25505 descend à 1,95 V et impose une batterie avec PCM) ;
+- l'abandon de la **réduction de la tension de fin de charge à chaud** (NTC) ;
+- l'ajout d'une self, d'un convertisseur à découpage à côté du capteur et de la radio, et de 8 résistances de 1 à 14 MΩ.
+
+Principe : les cellules débitent dans VCC (la charge système). Le LTC4071 dérive l'excédent (jusqu'à 50 mA) pour maintenir VCC à la tension de fin de charge, et relie la batterie à VCC par un interrupteur interne (4–6 Ω). Iq : 550 nA typ. (1,2 µA max). Fuite batterie une fois déconnectée : < 0,1 nA typ.
+
+| Réglage | Choix | Effet |
+|---|---|---|
+| **RIN** | **0 Ω** (empreinte gardée) | La datasheet n'exige RIN que si la source peut dépasser 50 mA de shunt. Isc des SP3-12 : 10,7 mA. En v1, 220 Ω coûtaient ~15 % de la récolte en plein soleil (~64 % contre ~75 %), et presque rien à faible éclairage (pertes en I²). Shunt max avec RIN = 0 : 4,1 V × 11 mA ≈ 45 mW, sans souci. |
+| **ADJ** | en l'air | Fin de charge **4,1 V** (4,0 V à GND, 4,2 V à VCC). |
+| **NTC / NTCBIAS** | thermistance **10 kΩ « curve 2 »** (B25/85 = 3490, ex. Vishay NTHS0402N02N1002F) de NTC à GND, **collée à la batterie** ; RNOM 10 kΩ de NTCBIAS à NTC | Avec ADJ en l'air : 4,1 V < 40 °C, puis 4,025 / 3,95 / 3,875 / 3,8 V par paliers de 10 °C. Sur un casque au soleil, c'est le principal levier de durée de vie de la LiPo. Polarisation pulsée : ~50 pA en moyenne. |
+| **LBSEL** | **à VCC** | Coupure batterie à **2,7 V**, reconnexion quand VCC atteint 3,6 V. Voir la remarque ci-dessous. |
+| **HBO** | non connecté | Sortie CMOS au niveau de VCC (jusqu'à 4,1 V), au-delà de ce que tolère une GPIO du nRF (3,3 V). La batterie se mesure par le SAADC. |
+| **D1** | Schottky à **faible courant inverse** | Anti-retour : sans elle, les cellules déchargent la batterie la nuit (recommandé par la datasheet). Choisir sur le courant inverse sous 4 V (il augmente fortement avec la température), plus que sur le Vf. |
+| **CVCC** | 10 µF (+ les 10 µF de VDDH) | Absorbe les pics d'émission BLE à travers les 4–6 Ω de l'interrupteur batterie. |
+
+**Pourquoi LBSEL à VCC (2,7 V) et pas à GND (3,2 V) comme en v1** : après une coupure, la batterie n'est reconnectée que quand VCC atteint VLBC_VCC. Avec LBSEL à GND, ce seuil vaut **4,19 V typ.** (à 1 mA), soit **au-dessus** de la tension de fin de charge de 4,1 V (ADJ en l'air) à laquelle le shunt plafonne VCC. La reconnexion ne se fait alors qu'à faible courant de charge, où le seuil baisse : c'est **limite**. Avec LBSEL à VCC, le seuil tombe à 3,6 V, sans ambiguïté. La coupure à 2,7 V est profonde pour une LiPo : c'est un **dernier recours**, et le firmware s'arrête bien avant (voir « Gestion de l'énergie »).
+
+### Cellules solaires
+- 2 × SP3-12 **en série**, comme en v1 : Vmp ~6 V, Voc ~9 V (jusqu'à ~10 V à froid, sans conséquence pour un shunt), Isc ~10,7 mA, ~50 mW en plein soleil.
+- La charge démarre dès que la tension de la chaîne dépasse Vbat + Vf de D1 (~4,2–4,5 V). Le Voc du silicium amorphe chute peu à faible éclairage, donc la charge fonctionne même par temps couvert, avec un courant proportionnel à la lumière.
+
+### MDBT50Q (nRF52840), alimentation
+- Dimensions : 10,5 × 15,5 × 2,05 mm. Le quartz 32 MHz et la self du DC/DC REG1 sont **intégrés**.
+- Schéma de référence « Reg0 DC/DC Enabled » (VDDH ≥ 3,6 V) :
+  - VDDH (broche 30) ← VCC du LTC4071, 10 µF (VDDH accepte 2,5–5,5 V, VCC ne dépasse pas 4,1 V) ;
+  - DCCH (31) → **L 10 µH 0603 (≥ 80 mA)** → VDD (28), 10 µF ;
+  - VBUS (32) : 10 µF, et D+/D− (35/34) en pads pour le bootloader UF2 et le debug. Pas de charge par USB pour l'instant (à revoir avec le choix de la batterie).
+- **VDD = REGOUT0 réglé à 3,0 V** (registre UICR) plutôt que 3,3 V : le régulateur reste en régulation jusqu'à une batterie à ~3,3 V (le seuil d'arrêt du firmware), et le MS5611 accepte 1,8–3,6 V. À prévoir dans la définition de carte et le bootloader (la valeur par défaut est 1,8 V).
+- **Quartz 32,768 kHz** (optionnel selon Raytac) : **retenu**. Il évite l'oscillateur RC, qui se recalibre périodiquement et impose des fenêtres de réception BLE plus larges (500 ppm), donc plus de temps radio.
+- Mesure de la batterie : canal **VDDHDIV5** interne du SAADC → pas de pont diviseur externe (trame `$LK8EX1` + service Battery).
+
+### Gestion de l'énergie
+- Le firmware mesure la batterie par le SAADC (VDDHDIV5). Sous **~3,4 V**, il passe en **veille « batterie faible »** : tout est coupé (capteur, buzzer, BLE), et le nRF reste en System ON avec un réveil RTC toutes les minutes environ pour remesurer. Il redémarre au-dessus de **~3,7 V**, après une recharge solaire.
+- Pas de System OFF dans ce cas : aucun signal externe ne pourrait réveiller le nRF quand la batterie remonte, puisque HBO ne monte qu'à pleine charge et dépasse le niveau toléré par les GPIO.
+- Consommation estimée en veille batterie faible : nRF en System ON + RTC ~1,5–3 µA + LTC4071 0,55 µA + MS5611 en veille < 0,15 µA → **~2–4 µA**. Avec une LiPo de 40 mAh arrêtée à 3,4 V (~10 % restants), il reste plusieurs semaines avant la coupure matérielle.
+- Dernier recours : le LTC4071 déconnecte la batterie à 2,7 V (fuite < 0,1 nA ensuite) et la reconnecte dès que les cellules ramènent VCC à 3,6 V. Une PCM dans la batterie n'est pas indispensable, mais elle ne gêne pas.
+
 ## Autres pistes hardware
 - **Buzzer** : PWM du nRF avec 2 canaux en opposition = pont en H natif (plus de comparateur ni de MCP4542) ; volume par rapport cyclique.
-- **Récupération solaire** : remplacer le LTC4071 (shunt) par un récupérateur MPPT (TI BQ25570/BQ25505, e-peas AEM10941, Iq ~0,5 µA) ; adapter cellules série/parallèle à la tension d'entrée.
-- **Batterie** : petite LiPo souple 40–100 mAh au lieu de la LIR2016 (~20 mAh).
-- **Capteur** : MS5611 (référence) vs **BMP581** (2×2 mm, très basse conso, FIFO/IIR intégrés, bruit à valider). Accéléromètre en option (fusion Kalman), coûteux en conso.
+- **Récupération solaire** : LTC4071 conservé, voir « Bloc d'alimentation ».
+  - Cellules conservées : **2 × PowerFilm SP3-12** (silicium amorphe souple, 12,7 × 64 mm), côte à côte sur le dessus du casque. Par cellule, en plein soleil : Vmp 3,0 V / Imp 8,5 mA (~25 mW), Voc 4,5 V, Isc 10,7 mA.
+  - Bilan grossier : 50 mW en plein soleil, ~5–15 mW réalistes sur le casque → ~1–3 mA de charge, contre 0,3–1 mA consommés en vol.
+  - Option écartée : récupérateur MPPT (TI BQ25505, e-peas AEM10941) avec les cellules en parallèle. Il ne vaut le coup que si les cellules sont souvent ombrées différemment. L'AEM10941 est de toute façon limité à un Voc de 5,0 V, trop juste pour 2 SP3-12 en parallèle par temps froid.
+- **Batterie** : petite LiPo souple 40–100 mAh au lieu de la LIR2016 (~20 mAh). Choix reporté.
+- **Capteur** : **MS5611 retenu** (connu, même algorithme que la v1). Levier conso : OSR et fréquence d'échantillonnage. BMP581 écarté pour l'instant. Accéléromètre en option (fusion Kalman), coûteux en conso.
 - **PCB souple** : raidisseurs sous module/capteur ; capteur protégé du vent (mousse) ; antenne orientée vers l'extérieur, zone dégagée respectée.
 
 ## Mesure de consommation

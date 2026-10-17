@@ -79,8 +79,9 @@ Once everything is set up, just get your solar panel under the sun and it should
 - [ ] 250 kHz clock limits: audio frequency is heavily quantized at high pitch (14 timer ticks at 2200 Hz → ~7 % steps); s64 math on a 16-bit MCU at this speed leaves little margin.
 
 ### Hardware
-- [ ] **LTC4071**: NTC tied to VCC, NTCBIAS/ADJ left unconnected. To be checked against the datasheet, especially the resulting float voltage (4.0 / 4.1 / 4.2 V) applied to the LIR2016.
-- [ ] Charge current limited to ~(6 − 0.3 − 4.1) / 440 Ω ≈ 3–4 mA with RIN = 440 Ω: slow recharge vs ~1 mA consumption.
+- [x] **LTC4071 configuration** checked against the datasheet: NTC tied to VCC disables the thermal float derating, NTCBIAS floating is the "not used" setting, ADJ floating selects a 4.1 V float voltage, LBSEL to GND selects a 3.2 V low-battery disconnect. All as intended.
+- [ ] **LTC4071 battery reconnection may be marginal**: after a low-battery disconnect, the battery reconnects when VCC reaches VLBC_VCC = 4.19 V typ. (LBSEL = GND, at 1 mA). That is above the 4.1 V float voltage at which the shunt clamps VCC. It only works at low charge current, where the threshold drops. LBSEL to VCC (2.7 V disconnect, 3.6 V reconnect) or ADJ to VCC (4.2 V float) would remove the ambiguity. To be checked on the bench: does a fully discharged vario always come back in the sun?
+- [ ] **RIN**: the schematic says 440 Ω, the board has **220 Ω**. Neither is needed: the SP3-12 string is current limited (Isc ≈ 10.7 mA, far below the 50 mA shunt limit), and the datasheet's PV example uses no RIN. With 220 Ω, about 15 % of the harvested power is lost in full sun (estimated).
 - [ ] Programming pads are on PGC1/PGD1 but config bits say `ICS_PGx3`: programming works, in-circuit debugging does not.
 - [ ] No dedicated VDD pad for the programmer (must go through BATT+ and the LTC4071).
 - [ ] PCB link to iTead is outdated (JLCPCB / PCBWay handle the 6/6 mil, 0.3 mm drill rules fine).
