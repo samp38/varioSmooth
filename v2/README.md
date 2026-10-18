@@ -3,7 +3,8 @@
 Notes de conception pour la modernisation du vario (2026-10).
 
 ## Objectifs
-- MCU **nRF52840** avec BLE : paramétrage depuis le téléphone + envoi de l'altitude baro à **LK8000** (Android).
+- MCU **nRF52840** avec BLE : paramétrage depuis le téléphone + envoi de la pression et du vario à **XCTrack** (puis LK8000) sur Android.
+- **Vario sans GPS** : l'application utilise le GPS du téléphone.
 - Schéma sous **KiCad**, carte redessinée en **PCB souple** pour l'intégration dans le casque.
 - Firmware compilé/flashé avec **PlatformIO**.
 - **Contrainte n°1 : la consommation.**
@@ -43,16 +44,48 @@ Notes de conception pour la modernisation du vario (2026-10).
 
 → Dans la v1, le **capteur** dominait (~0,6 mA sur 1 mA). Les leviers principaux : fréquence/résolution capteur (ou BMP581), buzzer, paramètres BLE.
 
-## Liaison LK8000 (Android)
-Vérifié dans le code source de LK8000 (`android/src/org/LK8000/BluetoothGattClientPort.java`, `Common/Source/Android/BluetoothSensor.cpp`) :
-- **Port série BLE type HM-10** : service `FFE0`, caractéristique `FFE1` → trames NMEA, ex. **`$LK8EX1`** (pression, altitude, vario, température, batterie). ✅ **Choix retenu** (sert aussi pour les commandes de paramétrage).
-- **Environmental Sensing Service** `0x181A` : pression `0x2A6D`, température `0x2A6E` ; + Battery Service `0x180F`. Option possible plus tard.
-- ❌ **Nordic UART Service non supporté.**
-- Le scan LK8000 filtre sur les UUID annoncés → annoncer `FFE0` (ou `0x181A`) dans l'advertising.
+## Liaison BLE avec XCTrack et LK8000 (Android)
+Trame retenue : **`$LK8EX1,<pression Pa>,99999,<vario cm/s>,<température °C>,<batterie>,*<checksum>`**. L'altitude vaut 99999 quand la pression est fournie (l'application la calcule avec son QNH), batterie 999 = non disponible, sinon tension (< 1000) ou 1000 + pourcentage.
+
+| | XCTrack | LK8000 |
+|---|---|---|
+| **Nordic UART Service** `6E400001-…` (TX `6E400003-…`) | ✅ | ❌ |
+| Port série type HM-10 : service `FFE0`, caractéristique `FFE1` | ❌ | ✅ |
+| Environmental Sensing `0x181A` (pression `0x2A6D`, température `0x2A6E`) + Battery `0x180F` | ✅ | ✅ |
+| Trame `$LK8EX1` | ✅ | ✅ |
+
+- **Choix pour le prototype : Nordic UART + `$LK8EX1`** pour XCTrack. Le core Adafruit fournit le service (`BLEUart`). La trame transporte le vario calculé par notre filtre ; avec la pression seule (ESS), l'application devrait recalculer le vario, avec plus de retard.
+- **Vérifié le 2026-10-18** sur un Galaxy S9 : XCTrack se connecte, et il **affiche le vario de la trame**, alors qu'il ne liste que la pression et la température dans les données du capteur. Test fait avec un vario fixe de +3 m/s, carte immobile (environnement PlatformIO `fake_climb`).
+- **LK8000 ensuite** : ajouter le service `FFE0`/`FFE1` en parallèle, avec la même trame. Les deux UUID tiennent dans le paquet d'annonce (le nom va dans la réponse au scan).
+- Sources : [page External Devices de XCTrack](https://xctrack.org/External_Devices.html) ; code source de LK8000 (`android/src/org/LK8000/BluetoothGattClientPort.java`, `Common/Source/Android/BluetoothSensor.cpp`), dont le scan filtre sur les UUID annoncés.
+- Dans XCTrack : choisir le capteur Bluetooth LE dans les réglages des capteurs externes ; le journal (widget log) montre les trames reçues. Pour un premier test, l'application **nRF Connect** suffit à voir les trames.
 
 ## App de paramétrage
 - Page **Web Bluetooth** (Chrome Android/desktop) plutôt qu'une app native : rien à publier ni maintenir.
-- Commandes texte via le même canal série BLE (FFE0/FFE1).
+- Commandes texte via le canal série BLE (Nordic UART).
+
+## Firmware (`firmware/`)
+Projet PlatformIO, environnement `feather_nrf52840` : `pio run -t upload`, puis `pio device monitor` (sortie de debug sur l'USB).
+
+| Fichier | Rôle |
+|---|---|
+| `src/ms5611.*` | Pilote du capteur : PROM + CRC4, compensation de température du 2e ordre (absentes en v1). Pression en OSR 4096, température en OSR 1024 (512 en v1). |
+| `src/vario.*` | Algorithme de la v1 : filtre passe-bas d'ordre 2 sur la pression, dérivée sur une fenêtre de 10 à 50 échantillons selon la vitesse, filtre IIR sur la vitesse. Calcul en flottant et sur l'altitude (cm/s) plutôt que sur la pression. |
+| `src/ble_link.*` | Nordic UART + trames `$LK8EX1`. |
+| `src/main.cpp` | Boucle à 50 Hz, même séquence que la v1 : lecture de la pression, conversion courte de la température, lancement de la pression suivante. Trame BLE à 10 Hz. La température doit être fraîche à chaque échantillon : la pression brute dérive d'environ 2 mbar/°C (coefficients typiques), et une température en retard se voit comme une fausse vitesse verticale. |
+
+À venir : son (PWM en pont en H sur le piézo), bouton marche/arrêt et volume, arrêt automatique, mesure batterie, réglages de consommation.
+
+### Câblage du prototype (Feather nRF52840 Express)
+| Breakout MS5611 (GY-63…) | Feather |
+|---|---|
+| VCC | 3V |
+| GND | GND |
+| SCL / SDA | SCL / SDA |
+| PS | VCC (mode I2C, souvent déjà fait sur la carte) |
+| CSB | GND → adresse 0x77 (VCC → 0x76, détectée aussi) |
+
+Piézo (plus tard) : entre deux broches PWM, par exemple A0 et A1, avec ~100 Ω en série.
 
 ## Bloc d'alimentation (figé le 2026-10-17)
 
@@ -139,6 +172,6 @@ Pas indispensable, mais fortement recommandé. Un multimètre lisse mal les pics
 - Limites : la Feather alimente le nRF en 3,3 V, alors que la carte finale l'alimentera directement par la LiPo via VDDH (chiffres proches mais pas identiques). Option propre : **nRF52840 DK** (~50 €), qui a un point de mesure prévu pour le PPK2.
 
 ## Plan
-1. **Prototype** : Feather nRF52840 + carte capteur, PlatformIO/Adafruit, mesures au PPK2, liaison LK8000.
+1. **Prototype** : Feather nRF52840 + carte capteur, PlatformIO/Adafruit, liaison XCTrack puis LK8000, mesures au PPK2.
 2. **Schéma KiCad** (l'ancien Eagle n'est importé que pour archive).
 3. **PCB souple** avec MDBT50Q sur raidisseur, alimenté directement par la LiPo via VDDH, assemblage chez le fabricant.

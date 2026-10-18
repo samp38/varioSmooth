@@ -1,4 +1,4 @@
-# Lightweight solar variometer for free flight
+# Lightweight solar variometer for free flight (v1, PIC24)
 
 ## Purpose
 This project is about buiding a simple, lightweight, energey self-sufficient and helmet embbeded variometer. It is small enough to remain in the helmet's inner coat and draws its energy from the sun. A small battery can provide power during shaded times up to 10 hours.
@@ -35,7 +35,7 @@ The variometer transcribes vertical speed to audio signal and must contain a pow
 
 * some capacitors and resistors (0603 package)
 
-For detailed list of components, including packages and values, see the [part list](https://github.com/samp38/varioSmooth/blob/master/doc/partList.txt).
+For detailed list of components, including packages and values, see the [part list](doc/partList.txt).
 
 ## PCB
 ![](doc/_TOP_small.png)![](doc/_BOTTOM_small.png)![](doc/_BOTTOM_reversed_small.png)![](doc/pics/top2.jpg)![](doc/pics/top.jpg)![](doc/pics/bottom.jpg)
@@ -44,7 +44,7 @@ The schematics and GERBER files are in the [pcb folder](pcb).  [iTead pcb protoy
 
 ## Programming the board
 ### Binary  file
-The code can be found in the [MPLABX project folder](VarioSMooth.X). Microchip's MPLABX IDE is free, as is the XC16 compiler. If you don't feel like building it, just download the [binary file](https://github.com/samp38/varioSmooth/releases/download/v/VarioSMooth.hex) in the [releases page](https://github.com/samp38/varioSmooth/releases).
+The code can be found in the [MPLABX project folder](firmware). Microchip's MPLABX IDE is free, as is the XC16 compiler. If you don't feel like building it, just download the [binary file](https://github.com/samp38/varioSmooth/releases/download/v/VarioSMooth.hex) in the [releases page](https://github.com/samp38/varioSmooth/releases).
 
 ### Upload to the board
 The PIC can be programmed via the MCLR, PGC and PGD pads on the bottom of the board. Ground and a Power must also be ok (VCC from programmer or the solar panel/battery). I used a PICKT 2, very cheap programmer for PICs.

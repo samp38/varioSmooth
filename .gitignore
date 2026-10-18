@@ -1,7 +1,9 @@
 .DS_Store
-VarioSMooth.X/build
-VarioSMooth.X/dist
-pcb/eagle.epf
+v1/firmware/build
+v1/firmware/dist
+v1/firmware/_build
+v1/firmware/out
+v1/pcb/eagle.epf
 *.b#*
 *.s#*
 *.l#*
