@@ -72,9 +72,10 @@ Projet PlatformIO, environnement `feather_nrf52840` : `pio run -t upload`, puis 
 | `src/ms5611.*` | Pilote du capteur : PROM + CRC4, compensation de température du 2e ordre (absentes en v1). Pression en OSR 4096, température en OSR 1024 (512 en v1). |
 | `src/vario.*` | Algorithme de la v1 : filtre passe-bas d'ordre 2 sur la pression, dérivée sur une fenêtre de 10 à 50 échantillons selon la vitesse, filtre IIR sur la vitesse. Calcul en flottant et sur l'altitude (cm/s) plutôt que sur la pression. |
 | `src/ble_link.*` | Nordic UART + trames `$LK8EX1`. |
+| `src/audio.*` | Bips de la v1 (tables `beepLen` / `audioFreq`, ton à 2/3, silence en descente). Piézo en pont : un module PWM pilote deux broches en opposition de phase, comme le volume « boost » de la v1 où le comparateur fournissait le signal inversé. Volume max seulement pour l'instant. |
 | `src/main.cpp` | Boucle à 50 Hz, même séquence que la v1 : lecture de la pression, conversion courte de la température, lancement de la pression suivante. Trame BLE à 10 Hz. La température doit être fraîche à chaque échantillon : la pression brute dérive d'environ 2 mbar/°C (coefficients typiques), et une température en retard se voit comme une fausse vitesse verticale. |
 
-À venir : son (PWM en pont en H sur le piézo), bouton marche/arrêt et volume, arrêt automatique, mesure batterie, réglages de consommation.
+À venir : niveaux de volume (un seul côté, rapport cyclique), bouton marche/arrêt, arrêt automatique, mesure batterie, réglages de consommation.
 
 ### Câblage du prototype (Feather nRF52840 Express)
 | Breakout MS5611 (GY-63…) | Feather |
@@ -85,7 +86,7 @@ Projet PlatformIO, environnement `feather_nrf52840` : `pio run -t upload`, puis 
 | PS | VCC (mode I2C, souvent déjà fait sur la carte) |
 | CSB | GND → adresse 0x77 (VCC → 0x76, détectée aussi) |
 
-Piézo (plus tard) : entre deux broches PWM, par exemple A0 et A1, avec ~100 Ω en série.
+Piézo (KPEG006, comme en v1) : entre **A0** et **A1**, polarité indifférente. Une résistance de 100–220 Ω en série est conseillée (pics de courant à chaque front, bruit sur le 3,3 V) mais pas indispensable sur le proto.
 
 ## Bloc d'alimentation (figé le 2026-10-17)
 

@@ -3,7 +3,7 @@
  *
  * MS5611 sampled at 50 Hz as in v1: each sample reads the pressure, then a
  * short temperature conversion, then starts the next pressure conversion.
- * v1 vario algorithm, $LK8EX1 sentences sent over BLE at 10 Hz to XCTrack.
+ * v1 vario algorithm and beeps, $LK8EX1 sentences sent over BLE at 10 Hz to XCTrack.
  * No GPS: the phone provides it.
  *
  * v1 chained the conversions from the Timer1 interrupt; here delay() blocks
@@ -13,6 +13,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 
+#include "audio.h"
 #include "ble_link.h"
 #include "ms5611.h"
 #include "vario.h"
@@ -25,13 +26,27 @@ namespace {
 constexpr uint32_t SAMPLE_PERIOD_MS = 1000 / Vario::SAMPLE_RATE;
 constexpr uint32_t SEND_EVERY = 5;                               // samples: 10 Hz
 constexpr uint32_t DEBUG_EVERY = 10;                             // samples: 5 Hz
+// The sensor warms up once sampled at 50 Hz (+0.6 °C and ~25 Pa in the first
+// second, measured): wait, then restart the filters. v1 waited 200 samples too.
+constexpr uint32_t WARMUP_SAMPLES = 4 * Vario::SAMPLE_RATE;
+// Piezo between these two pins (series resistor optional)
+constexpr uint8_t BUZZER_PIN_A = A0;
+constexpr uint8_t BUZZER_PIN_B = A1;
 
 MS5611 baro;
 Vario vario;
+Audio audio;
 
 uint32_t nextSampleMs;
+uint32_t warmupCountdown = WARMUP_SAMPLES;
 uint32_t sendCountdown = 0;
 uint32_t debugCountdown = 0;
+
+// Timing statistics, printed with the debug output
+uint32_t statSamples = 0;
+uint32_t statLate = 0;
+uint32_t statSkipped = 0;
+uint32_t statStartMs = 0;
 
 // Blocking temperature conversion, ~3 ms
 bool updateTemperature() {
@@ -98,6 +113,9 @@ void setup() {
                       (long)(baro.temperature() / 100), (long)abs(baro.temperature() % 100));
     }
 
+    if (!audio.begin(BUZZER_PIN_A, BUZZER_PIN_B)) {
+        fail("PWM for the buzzer not available");
+    }
     BleLink::begin("VarioSmooth");
 
     baro.startPressure();
@@ -111,6 +129,7 @@ void loop() {
         delay(waitMs);
     } else {
         nextSampleMs = millis();    // late: resynchronize instead of bursting
+        statLate++;
     }
     nextSampleMs += SAMPLE_PERIOD_MS;
 
@@ -121,10 +140,21 @@ void loop() {
     baro.startPressure();
 
     if (!ok) {
+        statSkipped++;
         return;     // I2C error or conversion not ready: skip this sample
     }
     int32_t p = baro.compensatePressure(d1);
+    if (warmupCountdown > 0) {
+        if (--warmupCountdown == 0) {
+            vario.begin(p);
+        }
+        return;     // nothing sent while warming up
+    }
     vario.push(p);
+    audio.tick(vario.speedIndex());
+    if (statSamples++ == 0) {
+        statStartMs = millis();
+    }
 
     if (sendCountdown-- == 0) {
         sendCountdown = SEND_EVERY - 1;
@@ -139,8 +169,13 @@ void loop() {
 
     if (DEBUG_SERIAL && debugCountdown-- == 0) {
         debugCountdown = DEBUG_EVERY - 1;
-        Serial.printf("p=%ld Pa  alt=%.1f m  climb=%.0f cm/s  idx=%d  T=%.2f C  ble=%d\n", (long)p,
-                      vario.altitude(), vario.climb(), vario.speedIndex(), baro.temperature() / 100.0,
-                      BleLink::connected());
+        // Average rate since the end of the warm-up
+        uint32_t elapsedMs = millis() - statStartMs;
+        float rate = elapsedMs ? (statSamples - 1) * 1000.0f / elapsedMs : 0;
+        Serial.printf("p=%ld Pa  alt=%.1f m  climb=%.0f cm/s  idx=%d  T=%.2f C  ble=%d  "
+                      "rate=%.2f Hz late=%lu skipped=%lu\n",
+                      (long)p, vario.altitude(), vario.climb(), vario.speedIndex(),
+                      baro.temperature() / 100.0, BleLink::connected(), rate,
+                      (unsigned long)statLate, (unsigned long)statSkipped);
     }
 }
