@@ -2,7 +2,10 @@
 
 #include <HardwarePWM.h>
 
-#include "vario.h"
+const Audio::Note Audio::STARTUP[] = {{220, ms(80)}, {1100, ms(80)}, {2200, ms(80)}, {0, 0}};
+const Audio::Note Audio::VOLUME_CHANGE[] = {
+    {220, ms(60)}, {0, ms(60)}, {220, ms(60)}, {0, ms(60)}, {220, ms(60)}, {0, 0}};
+const Audio::Note Audio::SHUTDOWN[] = {{2200, ms(80)}, {1100, ms(80)}, {220, ms(80)}, {0, 0}};
 
 namespace {
 // PWM3: Tone() uses PWM2, analogWrite() takes any module nobody owns
@@ -11,6 +14,16 @@ constexpr uint32_t PWM_TOKEN = 0x50495A4F;     // "OZIP"
 // 16 MHz / 4: 15-bit counter top down to 123 Hz, tones here are 233 to 930 Hz
 constexpr uint8_t PWM_CLOCK_DIV = PWM_PRESCALER_PRESCALER_DIV_4;
 constexpr uint32_t PWM_CLOCK_HZ = 16000000 / 4;
+
+struct Level {
+    bool weak;      // through pinWeak and its resistor
+    bool bridge;    // pinB in opposite phase instead of low
+};
+const Level LEVELS[Audio::VOLUME_COUNT] = {
+    {true, false},  // MEDIUM
+    {false, false}, // HIGH
+    {false, true},  // BOOST
+};
 
 constexpr uint32_t BEEP_DESCENT_PERIOD = 500;
 
@@ -43,34 +56,77 @@ const uint16_t AUDIO_FREQ[Vario::SPEED_INDEX_MAX + 1] = {
 };
 }
 
-bool Audio::begin(uint8_t a, uint8_t b) {
+bool Audio::begin(uint8_t a, uint8_t b, uint8_t weak) {
     pinA = a;
     pinB = b;
-    if (!pwm.takeOwnership(PWM_TOKEN) || !pwm.addPin(pinA) || !pwm.addPin(pinB)) {
+    pinWeak = weak;
+    pinMode(pinWeak, INPUT);
+    if (!pwm.takeOwnership(PWM_TOKEN) || !pwm.addPin(pinB) || !pwm.addPin(pinA)) {
         return false;
     }
     pwm.setClockDiv(PWM_CLOCK_DIV);
-    tone(0);
+    pinOut = pinA;
+    setVolume(vol);
     countdown = 0;
     beeping = false;
     return true;
 }
 
+void Audio::setVolume(Volume v) {
+    vol = v;
+    uint8_t out = LEVELS[vol].weak ? pinWeak : pinA;
+    if (out != pinOut) {
+        // The other pin goes high impedance, so it does not short the resistor
+        if (pwm.pin2channel(pinOut) >= 0) {
+            pwm.removePin(pinOut);
+        }
+        pinMode(pinOut, INPUT);
+        pwm.addPin(out);
+        pinOut = out;
+    }
+    tone(0);
+}
+
 void Audio::tone(uint32_t freqHz) {
     if (freqHz == 0) {
         // Both pins low: no voltage across the piezo
-        pwm.writePin(pinA, 0);
+        pwm.writePin(pinOut, 0);
         pwm.writePin(pinB, 0);
         return;
     }
     uint16_t top = (uint16_t)min<uint32_t>(PWM_CLOCK_HZ / freqHz, 0x7FFF);
     pwm.setMaxValue(top);
-    // Same 50 % duty cycle, opposite polarity: pinB is the complement of pinA
-    pwm.writePin(pinA, top / 2);
-    pwm.writePin(pinB, top / 2, true);
+    pwm.writePin(pinOut, top / 2);
+    if (LEVELS[vol].bridge) {
+        // Opposite polarity: pinB is the complement of pinOut
+        pwm.writePin(pinB, top / 2, true);
+    } else {
+        pwm.writePin(pinB, 0);
+    }
+}
+
+void Audio::play(const Note *m) {
+    melody = m;
+    noteCountdown = 0;
 }
 
 void Audio::tick(int speedIndex) {
+    if (melody) {
+        if (noteCountdown-- != 0) {
+            return;
+        }
+        if (melody->samples != 0) {
+            tone(melody->freqHz);
+            noteCountdown = melody->samples - 1;
+            melody++;
+            return;
+        }
+        // End of the melody: back to the vario beeps, starting with a beep
+        melody = nullptr;
+        countdown = 0;
+        beeping = false;
+    }
+
     if (countdown-- != 0) {
         return;
     }

@@ -72,10 +72,11 @@ Projet PlatformIO, environnement `feather_nrf52840` : `pio run -t upload`, puis 
 | `src/ms5611.*` | Pilote du capteur : PROM + CRC4, compensation de température du 2e ordre (absentes en v1). Pression en OSR 4096, température en OSR 1024 (512 en v1). |
 | `src/vario.*` | Algorithme de la v1 : filtre passe-bas d'ordre 2 sur la pression, dérivée sur une fenêtre de 10 à 50 échantillons selon la vitesse, filtre IIR sur la vitesse. Calcul en flottant et sur l'altitude (cm/s) plutôt que sur la pression. |
 | `src/ble_link.*` | Nordic UART + trames `$LK8EX1`. |
-| `src/audio.*` | Bips de la v1 (tables `beepLen` / `audioFreq`, ton à 2/3, silence en descente). Piézo en pont : un module PWM pilote deux broches en opposition de phase, comme le volume « boost » de la v1 où le comparateur fournissait le signal inversé. Volume max seulement pour l'instant. |
+| `src/audio.*` | Bips de la v1 (tables `beepLen` / `audioFreq`, ton à 2/3, silence en descente) et mélodies (démarrage, volume, arrêt). 3 volumes comme en v1 : boost = deux broches en opposition de phase (le comparateur de la v1 fournissait le signal inversé), high = une seule broche, medium = une 3ᵉ broche à travers une résistance (le potentiomètre numérique de la v1). Réduire le rapport cyclique ne marche pas : le son vient surtout des harmoniques, et chaque front fait sonner le piézo pareil ; il faut arrondir les fronts (RC avec la capacité du piézo). |
+| `src/button.*` | Bouton scruté à chaque échantillon (anti-rebond par la période de 20 ms). Appui court : volume suivant (enregistré en flash à l'extinction seulement : une écriture bloque ~0,5 s, le capteur refroidit pendant la pause et le vario voit une fausse montée). Appui long (> 0,5 s) : arrêt en System OFF, le bouton rallume la carte. |
 | `src/main.cpp` | Boucle à 50 Hz, même séquence que la v1 : lecture de la pression, conversion courte de la température, lancement de la pression suivante. Trame BLE à 10 Hz. La température doit être fraîche à chaque échantillon : la pression brute dérive d'environ 2 mbar/°C (coefficients typiques), et une température en retard se voit comme une fausse vitesse verticale. |
 
-À venir : niveaux de volume (un seul côté, rapport cyclique), bouton marche/arrêt, arrêt automatique, mesure batterie, réglages de consommation.
+À venir : arrêt automatique, mesure batterie, réglages de consommation.
 
 ### Câblage du prototype (Feather nRF52840 Express)
 | Breakout MS5611 (GY-63…) | Feather |
@@ -86,7 +87,12 @@ Projet PlatformIO, environnement `feather_nrf52840` : `pio run -t upload`, puis 
 | PS | VCC (mode I2C, souvent déjà fait sur la carte) |
 | CSB | GND → adresse 0x77 (VCC → 0x76, détectée aussi) |
 
-Piézo (KPEG006, comme en v1) : entre **A0** et **A1**, polarité indifférente. Une résistance de 100–220 Ω en série est conseillée (pics de courant à chaque front, bruit sur le 3,3 V) mais pas indispensable sur le proto.
+Piézo (KPEG006, comme en v1), polarité indifférente :
+```
+A0 ──[ 220 Ω ]──┬── KPEG006 ── A1
+A2 ──[ ~1 kΩ ]──┘   (volume medium, valeur à ajuster à l'oreille)
+```
+La 220 Ω limite les pics de courant à chaque front (bruit sur le 3,3 V).
 
 ## Bloc d'alimentation (figé le 2026-10-17)
 
