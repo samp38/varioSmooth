@@ -188,6 +188,12 @@ bool processSample() {
     if (warmupCountdown > 0) {
         if (--warmupCountdown == 0) {
             vario.begin(p);
+            if (DEBUG_SERIAL) {
+                Serial.printf("VarioSmooth v2 ready %lu ms after reset: MS5611 at 0x%02X, "
+                              "%ld Pa, %.2f C, volume %d\n",
+                              (unsigned long)millis(), baro.address(), (long)p,
+                              baro.temperature() / 100.0, audio.volume());
+            }
         }
         return false;   // nothing sent while warming up
     }
@@ -226,12 +232,9 @@ void setup() {
     pinMode(LED_RED, OUTPUT);
     button.begin(BUTTON_PIN);
     if (DEBUG_SERIAL) {
+        // No wait for the USB serial (re-enumerated at every wake-up): the
+        // start-up info is printed at the end of the warm-up
         Serial.begin(115200);
-        // Give the USB serial a chance to come up, without blocking when unplugged
-        for (uint32_t t0 = millis(); !Serial && millis() - t0 < 2000;) {
-            delay(10);
-        }
-        Serial.println("VarioSmooth v2");
     }
 
     InternalFS.begin();
@@ -252,11 +255,6 @@ void setup() {
         fail("MS5611 read error");
     }
     vario.begin(p);
-    if (DEBUG_SERIAL) {
-        Serial.printf("MS5611 at 0x%02X, %ld Pa, %ld.%02ld C, volume %d\n", baro.address(),
-                      (long)p, (long)(baro.temperature() / 100),
-                      (long)abs(baro.temperature() % 100), audio.volume());
-    }
 
     BleLink::begin("VarioSmooth");
 
