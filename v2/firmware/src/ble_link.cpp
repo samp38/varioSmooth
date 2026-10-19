@@ -19,6 +19,9 @@ namespace BleLink {
 void begin(const char *name) {
     // Larger MTU: a whole $LK8EX1 sentence fits in one notification
     Bluefruit.configPrphBandwidth(BANDWIDTH_MAX);
+    // No connection LED: the final board has none, and on the Feather it
+    // would stay lit in System OFF (~1 mA) if powered off while lit
+    Bluefruit.autoConnLed(false);
     Bluefruit.begin();
     Bluefruit.setName(name);
     Bluefruit.setTxPower(0);
