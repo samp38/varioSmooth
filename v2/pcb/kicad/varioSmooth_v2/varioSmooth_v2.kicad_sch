@@ -5381,6 +5381,106 @@
 			(embedded_fonts no)
 		)
 	)
+	(text "PROTECTION ESD USB (au plus pres de J1)"
+		(exclude_from_sim no)
+		(at 42.672 164.084 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "1a65472d-242e-4736-bc37-6b71d4611846")
+	)
+	(text "Mode haute tension : VDDH = batterie, REG0 DC/DC -> VDD 3,3 V"
+		(exclude_from_sim no)
+		(at 159.766 37.338 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "33ad97c2-30ce-4222-b19f-ddcc1844a9ac")
+	)
+	(text "MODULE BLE nRF52840 (MDBT50Q)"
+		(exclude_from_sim no)
+		(at 159.766 33.528 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "43434a03-d3bd-4d54-8523-9c960aaf5213")
+	)
+	(text "QUARTZ 32,768 kHz (LFXO)"
+		(exclude_from_sim no)
+		(at 190.5 74.93 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "6d3fc4e2-bbfe-4e3c-811d-cd4786453df1")
+	)
+	(text "BOUTON DEPORTE (volume / marche-arret)"
+		(exclude_from_sim no)
+		(at 226.06 113.03 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "b0a0686a-b218-4f45-b711-b3505efad118")
+	)
+	(text "ALIMENTATION - charge solaire et USB (LTC4071, shunt 4,1 V, coupure 3,2 V)"
+		(exclude_from_sim no)
+		(at 67.31 20.32 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "c2b34782-97e7-4f6e-8101-14365f2d0dd9")
+	)
+	(text "CAPTEUR DE PRESSION MS5611 (I2C, adresse 0x77)"
+		(exclude_from_sim no)
+		(at 241.3 18.288 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "d119f661-cedf-49d4-91d8-69bb746e1c64")
+	)
+	(text "USB-C (USB 2.0, CC 5,1k = device)"
+		(exclude_from_sim no)
+		(at 40.64 91.44 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "ea6b0afd-02af-4e45-bbaa-d7b3fa38bffb")
+	)
+	(text "PROGRAMMATION SWD (pastilles de test)"
+		(exclude_from_sim no)
+		(at 205.74 135.89 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "edd0c9bb-6bf2-4524-8307-1233554afa3e")
+	)
+	(text "PIEZO KPEG006 (3 volumes)"
+		(exclude_from_sim no)
+		(at 223.52 72.39 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "ef674055-9881-4d8c-b51d-f4c38d6b3378")
+	)
 	(junction
 		(at 160.02 62.23)
 		(diameter 0)
@@ -6688,16 +6788,6 @@
 			(justify left bottom)
 		)
 		(uuid "e6c76bf1-42f8-43ea-8ad4-8b44aa82ce17")
-	)
-	(label "Net-(D2-1)"
-		(at 41.91 58.42 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "ea9eef75-a0ea-487f-9a15-64e6cf45eb00")
 	)
 	(label "XL2"
 		(at 158.75 85.09 0)
@@ -8401,7 +8491,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "varioSmooth_v2:WirePad_1x02_SMD_P2.54mm"
 			(at 240.03 118.11 0)
 			(hide yes)
 			(show_name no)
@@ -8628,7 +8718,7 @@
 			)
 		)
 		(property "Value" "VBUS"
-			(at 31.75 62.23 0)
+			(at 31.496 59.944 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -9147,7 +9237,7 @@
 				)
 			)
 		)
-		(property "MPN" "LQM18PN100"
+		(property "MPN" "LQM18DN100M70L"
 			(at 147.32 72.39 90)
 			(hide yes)
 			(show_name no)
@@ -10153,7 +10243,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "varioSmooth_v2:WirePad_1x02_SMD_P2.54mm"
 			(at 106.68 30.226 90)
 			(hide yes)
 			(show_name no)
@@ -10333,7 +10423,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "Buzzer"
+		(property "Value" "KPEG006"
 			(at 255.27 86.3599 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10344,7 +10434,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "varioSmooth_v2:WirePad_1x02_SMD_P2.54mm"
 			(at 250.825 82.55 90)
 			(hide yes)
 			(show_name no)
@@ -11361,7 +11451,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "varioSmooth_v2:WirePad_1x02_SMD_P2.54mm"
 			(at 27.94 41.656 90)
 			(hide yes)
 			(show_name no)
@@ -12661,6 +12751,32 @@
 			)
 		)
 	)
+	(symbol_instances
+		(path "/5018f1df-9e1e-402d-a847-3df19d33240e/bb335c7b-3b4b-4172-9c29-bc7d96f5974c"
+			(reference "SC1")
+			(unit 1)
+			(value "Solar_Cells")
+			(footprint "varioSmooth_v2:WirePad_1x02_SMD_P2.54mm")
+		)
+		(path "/5018f1df-9e1e-402d-a847-3df19d33240e/9371741f-307a-4b8c-8384-d988d8845f26"
+			(reference "BT1")
+			(unit 1)
+			(value "Battery_Cell")
+			(footprint "varioSmooth_v2:WirePad_1x02_SMD_P2.54mm")
+		)
+		(path "/5018f1df-9e1e-402d-a847-3df19d33240e/943620be-61ad-468e-9f0a-41894943cd5b"
+			(reference "BZ1")
+			(unit 1)
+			(value "KPEG006")
+			(footprint "varioSmooth_v2:WirePad_1x02_SMD_P2.54mm")
+		)
+		(path "/5018f1df-9e1e-402d-a847-3df19d33240e/3f40cdba-f7e2-46d2-a2a0-b4c0d905c870"
+			(reference "SW1")
+			(unit 1)
+			(value "SW_Push")
+			(footprint "varioSmooth_v2:WirePad_1x02_SMD_P2.54mm")
+		)
+)
 	(sheet_instances
 		(path "/"
 			(page "1")

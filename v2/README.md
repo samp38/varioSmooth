@@ -9,6 +9,27 @@ Notes de conception pour la modernisation du vario (2026-10).
 - Firmware compilé/flashé avec **PlatformIO**.
 - **Contrainte n°1 : la consommation.**
 
+## Réorientation (2026-10-20) : deux appareils
+Le vario intégré au casque cumule des contraintes contradictoires : BLE et antenne, petite batterie, fils vers les cellules et le bouton. La v1 marche, mais elle est pénible à installer : les fils passés par l'aération cassent, la carte est trop épaisse pour la doublure, et le flashage au PICkit est laborieux. Un GPS aurait aggravé tout cela. Le projet est donc scindé, sur le modèle de la gamme Stodeus (miniBip → UltraBip, tous dans un boîtier de 58 × 36 × 14 mm) :
+
+| | **Extension** (cockpit) — en premier | **Vario casque** — ensuite |
+|---|---|---|
+| Rôle | Extension du téléphone : pression, vario et `$LK8EX1` vers XCTrack, **log GPS IGC de secours**, bip si le téléphone plante | Bip seul, comme la v1 |
+| Fixation | Cockpit ; peut être accroché verticalement (un GNSS moderne y perd quelques dB, sans gêne en vol) | Petit boîtier sur une sangle du casque, laissé à demeure (on ne l'oublie pas) |
+| Contenu | Schéma KiCad actuel (MDBT50Q, MS5611, piezo, LTC4071, USB-C) + GNSS (u-blox MAX-M10S + patch ~15 × 15 mm, UART, alimentation coupable) + flash QSPI (16 Mo) + cellules plus grandes + LiPo ≥ 500 mAh | Capteur, piezo, cellules et bouton **sur le boîtier** : plus aucun fil. USB-C pour charger et flasher |
+| BLE | Désactivable | Aucun, ou seulement au sol pour les réglages |
+
+### Extension : comportement visé
+- Téléphone connecté : trames `$LK8EX1`, bip coupé (XCTrack bipe).
+- Connexion perdue depuis un certain délai : bip automatique.
+- Log IGC permanent à 1 Hz (~125 Ko/h, ~130 h sur 16 Mo), récupérable en **USB Mass Storage** (Adafruit_SPIFlash + FatFs + TinyUSB) : le boîtier apparaît comme une clé USB.
+- Flash QSPI sur les **mêmes broches que la Feather Express** (P0.17, P0.19–P0.23) : le firmware la gère sans changement, et le logger se prototype sur la Feather (GD25Q16 2 Mo intégrée) avec une carte d'évaluation MAX-M10S.
+- Le GNSS consomme 5–30 mW selon la puce (MAX-M10S < 25 mW en suivi) : c'est lui qui dimensionne la batterie. Garder une alimentation de sauvegarde (V_BCKP) pour démarrer à chaud.
+
+### Vario casque : à trancher
+- **Même MDBT50Q que l'extension**, radio coupée : un seul firmware (deux environnements PlatformIO), même flashage UF2, schéma commun. Le capteur domine la consommation (~1 mA à 50 Hz), donc un MCU plus sobre (SAMD21, STM32 L0/U0) n'apporterait que peu, pour un surcoût du module d'environ 10 € et 15 × 10 mm.
+- Bouton du boîtier, ou accéléromètre (taper sur le casque, ex. LIS2DH12 ~2 µA) à prototyper.
+
 ## Choix du MCU : module Raytac MDBT50Q (nRF52840)
 - **nRF52840 plutôt que nRF52832** (seuls supportés par le core Adafruit) :
   - entrée **VDDH (jusqu'à 5,5 V) + DC/DC intégré** → alimentation directe sur la LiPo, suppression du LDO (ADP160) ;
@@ -179,6 +200,9 @@ Pas indispensable, mais fortement recommandé. Un multimètre lisse mal les pics
 - Limites : la Feather alimente le nRF en 3,3 V, alors que la carte finale l'alimentera directement par la LiPo via VDDH (chiffres proches mais pas identiques). Option propre : **nRF52840 DK** (~50 €), qui a un point de mesure prévu pour le PPK2.
 
 ## Plan
-1. **Prototype** : Feather nRF52840 + carte capteur, PlatformIO/Adafruit, liaison XCTrack puis LK8000, mesures au PPK2.
-2. **Schéma KiCad** (l'ancien Eagle n'est importé que pour archive).
-3. **PCB souple** avec MDBT50Q sur raidisseur, alimenté directement par la LiPo via VDDH, assemblage chez le fabricant.
+1. ~~**Prototype** : Feather nRF52840 + carte capteur, PlatformIO/Adafruit, liaison XCTrack~~ (fait) ; LK8000 et mesures au PPK2 à venir.
+2. **Extension** :
+   - logger IGC prototypé sur la Feather (flash QSPI intégrée + carte d'évaluation MAX-M10S) ;
+   - schéma KiCad (`pcb/kicad/varioSmooth_v2`, base déjà dessinée) complété du GNSS et de la flash ;
+   - boîtier pour le cockpit, PCB rigide.
+3. **Vario casque** : petit boîtier sur une sangle, firmware commun.
