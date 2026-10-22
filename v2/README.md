@@ -5,30 +5,62 @@ Notes de conception pour la modernisation du vario (2026-10).
 ## Objectifs
 - MCU **nRF52840** avec BLE : paramétrage depuis le téléphone + envoi de la pression et du vario à **XCTrack** (puis LK8000) sur Android.
 - **Vario sans GPS** : l'application utilise le GPS du téléphone.
-- Schéma sous **KiCad**, carte redessinée en **PCB souple** pour l'intégration dans le casque.
+- Schéma sous **KiCad**, carte redessinée pour l'intégration dans le casque.
 - Firmware compilé/flashé avec **PlatformIO**.
 - **Contrainte n°1 : la consommation.**
 
-## Réorientation (2026-10-20) : deux appareils
-Le vario intégré au casque cumule des contraintes contradictoires : BLE et antenne, petite batterie, fils vers les cellules et le bouton. La v1 marche, mais elle est pénible à installer : les fils passés par l'aération cassent, la carte est trop épaisse pour la doublure, et le flashage au PICkit est laborieux. Un GPS aurait aggravé tout cela. Le projet est donc scindé, sur le modèle de la gamme Stodeus (miniBip → UltraBip, tous dans un boîtier de 58 × 36 × 14 mm) :
+## Réorientation : deux appareils (2026-10-20, redéfinie le 2026-10-22)
+La v1 marche, mais elle est pénible à installer : les fils passés par l'aération cassent, la carte est trop épaisse pour la doublure, et le flashage au PICkit est laborieux. Le projet est scindé en deux appareils :
 
-| | **Extension** (cockpit) — en premier | **Vario casque** — ensuite |
+| | **Vario casque** | **Extension** (cockpit) |
 |---|---|---|
-| Rôle | Extension du téléphone : pression, vario et `$LK8EX1` vers XCTrack, **log GPS IGC de secours**, bip si le téléphone plante | Bip seul, comme la v1 |
-| Fixation | Cockpit ; peut être accroché verticalement (un GNSS moderne y perd quelques dB, sans gêne en vol) | Petit boîtier sur une sangle du casque, laissé à demeure (on ne l'oublie pas) |
-| Contenu | Schéma KiCad actuel (MDBT50Q, MS5611, piezo, LTC4071, USB-C) + GNSS (u-blox MAX-M10S + patch ~15 × 15 mm, UART, alimentation coupable) + flash QSPI (16 Mo) + cellules plus grandes + LiPo ≥ 500 mAh | Capteur, piezo, cellules et bouton **sur le boîtier** : plus aucun fil. USB-C pour charger et flasher |
-| BLE | Désactivable | Aucun, ou seulement au sol pour les réglages |
+| Rôle | Bip + pression et vario (`$LK8EX1`) vers XCTrack : le baro du vario donne une finesse calculée correcte | **Batterie externe** du téléphone + vario (bip activable) + **logger GPS IGC** + BLE |
+| Intégration | Dans le casque, cellules solaires sur le dessus, comme la v1 | Boîtier dans le cockpit ou la sellette |
+| MCU | nRF52840 (MDBT50Q, ou ISP1807 pour gagner de la place) | nRF52840 |
+| USB | **Aucun** : SWD une seule fois, puis OTA BLE | USB-C : recharge, flash, récupération du log |
+| Énergie | LiPo + 2 × SP3-12 + LTC4071, comme la v1 | Li-ion **18650** + panneau solaire (prolonge un peu l'autonomie) |
+| Interface | Un bouton | Boutons **+ / − / push**, petit écran, menu |
+
+### Vario casque
+- **Pas de connecteur USB** (il serait inaccessible) : J1, U1 (protection ESD), R3 et R4 disparaissent, la carte rétrécit (~20 × 22 mm avec le MDBT50Q, ~15 × 18 mm avec un ISP1807 ; estimations sans placement).
+- **Module : à trancher** entre le MDBT50Q et l'**Insight SiP ISP1807** (même nRF52840, donc même firmware) :
+
+  | | MDBT50Q-1MV2 | ISP1807 |
+  |---|---|---|
+  | Taille | 10,5 × 15,5 × 2,05 mm + zone d'antenne | 8 × 8 × 1 mm, antenne intégrée |
+  | Quartz | 32 MHz intégré, 32,768 kHz externe (Y1, C5, C6) | 32 MHz et 32,768 kHz a priori intégrés (à vérifier) |
+  | Prix | ~10 € | ~15–20 € (stock à vérifier) |
+  | Soudure | Pads accessibles, air chaud possible | LGA à pas fin : pochoir + four |
+  | Bootloader | Déjà présent sur un module récupéré d'une Feather | Rien : sonde SWD obligatoire |
+  | Carte Adafruit | Définition Feather nRF52840 utilisable telle quelle | Pas de variante : définition de carte à adapter |
+
+  Dans les deux cas, l'antenne doit être au bord de la carte, avec une zone sans cuivre.
+- **Flash** : bootloader Adafruit flashé une fois par SWD (sonde CMSIS-DAP), puis mises à jour en **OTA BLE** (nRF Connect ou Bluefruit). Le bouton reste sur **P1.02** : maintenu à la mise sous tension, il lance le bootloader en mode DFU, ce qui permet de récupérer un firmware planté sans ouvrir le casque. Pastilles SWD conservées.
+- **Buzzer sur la carte** : à tester avant de l'adopter. Un piézo CMS (~9 × 9 mm, résonance ~4 kHz) est bien plus faible qu'un KPEG006 aux fréquences du vario (400–1500 Hz) ; il ne convient que si la carte est près de l'oreille. Essai : Feather + piézo CMS contre KPEG006, casque sur la tête, avec un ventilateur.
+- **Fils vers les cellules** : point faible de la v1, prévoir un passage propre et un serre-câble collé sur la carte.
+- La carte routée actuelle (avec USB-C, 20 × 32,75 mm) sert de **prototype de développement** : alimentation, capteur, audio, OTA et consommation, avant la version compacte.
+
+### Extension : batterie externe, vario et logger
+- **Batterie** : 18650 en **1S** (1 ou 2 cellules en parallèle, ~3000–3500 mAh chacune) : pas d'équilibrage, chargeurs et élévateurs courants. 2 cellules : ~37 × 65 × 19 mm, ~95 g. Cellules de marque (Samsung 35E, Molicel, LG).
+- **Alimentation** : chargeur type **TI BQ25895** (le LTC4071 ne convient plus) :
+  - power path (l'appareil fonctionne pendant la charge) ;
+  - sortie 5 V élevée (OTG, ~2–3 A) pour le téléphone ;
+  - NTC avec seuils JEITA : pas de charge sous 0 °C ;
+  - régulation de la tension d'entrée (VINDPM), qui fait office de MPPT simplifié pour un panneau de 6 V nominal ;
+  - suivi par I²C depuis le nRF (niveau, courants, état).
+  - Alternative écartée : IP5328P (charge rapide PD/QC intégrée, mais peu documenté et peu pilotable).
+- **Connectique** : USB-C en entrée ; sortie USB-C ou USB-A en 5 V seul (le téléphone charge à ~1,5–2 A, suffisant pour XCTrack en vol). La charge rapide PD demanderait un contrôleur USB-PD en plus.
+- **Sécurité** : protection de cellule (cellules protégées ou DW01 + MOSFET), fusible, thermistance sur les cellules, boîtier résistant aux chocs.
+- **Solaire** : ~1 W en plein soleil → ~150–200 mA dans la batterie, contre 300–600 mA pour un téléphone avec XCTrack. Le panneau alimente l'extension elle-même et ralentit la décharge du téléphone.
+- **Écran** : un **Sharp Memory LCD** (ex. LS013B7DH03, 1,28″) plutôt qu'un OLED. Il reste lisible en plein soleil et consomme quelques µA, contre 10–20 mA pour un OLED peu lisible au soleil.
+- **Baro** : avec les deux appareils, n'envoyer la pression à XCTrack que depuis l'un des deux (baro désactivable sur l'extension, comme le bip).
 
 ### Extension : comportement visé
-- Téléphone connecté : trames `$LK8EX1`, bip coupé (XCTrack bipe).
+- Téléphone connecté : trames `$LK8EX1`, bip coupé (XCTrack bipe), sauf si le bip est activé dans le menu.
 - Connexion perdue depuis un certain délai : bip automatique.
 - Log IGC permanent à 1 Hz (~125 Ko/h, ~130 h sur 16 Mo), récupérable en **USB Mass Storage** (Adafruit_SPIFlash + FatFs + TinyUSB) : le boîtier apparaît comme une clé USB.
 - Flash QSPI sur les **mêmes broches que la Feather Express** (P0.17, P0.19–P0.23) : le firmware la gère sans changement, et le logger se prototype sur la Feather (GD25Q16 2 Mo intégrée) avec une carte d'évaluation MAX-M10S.
-- Le GNSS consomme 5–30 mW selon la puce (MAX-M10S < 25 mW en suivi) : c'est lui qui dimensionne la batterie. Garder une alimentation de sauvegarde (V_BCKP) pour démarrer à chaud.
-
-### Vario casque : à trancher
-- **Même MDBT50Q que l'extension**, radio coupée : un seul firmware (deux environnements PlatformIO), même flashage UF2, schéma commun. Le capteur domine la consommation (~1 mA à 50 Hz), donc un MCU plus sobre (SAMD21, STM32 L0/U0) n'apporterait que peu, pour un surcoût du module d'environ 10 € et 15 × 10 mm.
-- Bouton du boîtier, ou accéléromètre (taper sur le casque, ex. LIS2DH12 ~2 µA) à prototyper.
+- Le GNSS consomme 5–30 mW selon la puce (MAX-M10S < 25 mW en suivi), négligeable devant le téléphone. Garder une alimentation de sauvegarde (V_BCKP) pour démarrer à chaud.
 
 ## Choix du MCU : module Raytac MDBT50Q (nRF52840)
 - **nRF52840 plutôt que nRF52832** (seuls supportés par le core Adafruit) :
@@ -115,13 +147,21 @@ A2 ──[ ~1 kΩ ]──┘   (volume medium, valeur à ajuster à l'oreille)
 ```
 La 220 Ω limite les pics de courant à chaque front (bruit sur le 3,3 V).
 
-## Bloc d'alimentation (figé le 2026-10-17)
+## Bloc d'alimentation du vario casque (config v1, retenue le 2026-10-21)
 
 ```
-SP3-12 ─ SP3-12 ── D1 (Schottky) ── RIN (0 Ω) ──┬── VCC ── VDDH (MDBT50Q) ── REG0 DC/DC ── VDD 3,0 V ── MS5611, buzzer
-   (série, côte à côte sur le dessus)             │
-                                    LTC4071 (shunt)── BAT ── LiPo   (NTC 10k collée à la batterie)
+SP3-12 ─ SP3-12 ── D1 (Schottky) ── RIN (200 Ω) ──┬── VCC ── VDDH (MDBT50Q) ── REG0 DC/DC ── VDD 3,0 V ── MS5611, buzzer
+   (série, côte à côte sur le dessus)               │
+                                      LTC4071 (shunt)── BAT ── LiPo (hors carte, pastilles BT1)
 ```
+
+**Retenu le 2026-10-21 : la configuration de la v1**, qui a toujours fonctionné. Elle remplace les réglages étudiés le 2026-10-17 (RIN 0 Ω, LBSEL à VCC, NTC sur la batterie), conservés ci-dessous pour mémoire :
+- **RIN = 200 Ω** ;
+- **ADJ en l'air** (fin de charge 4,1 V) ;
+- **NTC relié à VCC** : pas de réduction de la tension de fin de charge à chaud ;
+- **LBSEL à GND** : coupure à 3,2 V, meilleure conservation pendant les longs mois sans vol.
+
+**Froid** : d'après la datasheet, le NTC du LTC4071 ne fait que baisser la tension de fin de charge au-dessus de 40 °C. Il n'y a **aucune coupure de charge par temps froid**. Le courant de charge est minuscule, mais charger une LiPo sous 0 °C reste un risque. Parade possible : un P-MOSFET entre les cellules et le LTC4071, coupé par le nRF sous 0 °C (température du MS5611).
 
 ### Chargeur : LTC4071 (shunt, MSOP8 ou DFN 2 × 3 mm), comme la v1
 Le **BQ25505** (MPPT) a été envisagé puis écarté. Les cellules sont côte à côte sur le dessus du casque, donc à l'ombre ensemble : la série ne pénalise pas. Et avec RIN ≈ 0, le LTC4071 récupère déjà ~75 % de la puissance des cellules, contre ~80–85 % pour le BQ25505 (estimations, non mesurées). Ce faible gain ne justifiait pas :
@@ -152,7 +192,7 @@ Principe : les cellules débitent dans VCC (la charge système). Le LTC4071 dér
 - Schéma de référence « Reg0 DC/DC Enabled » (VDDH ≥ 3,6 V) :
   - VDDH (broche 30) ← VCC du LTC4071, 10 µF (VDDH accepte 2,5–5,5 V, VCC ne dépasse pas 4,1 V) ;
   - DCCH (31) → **L 10 µH 0603 (≥ 80 mA)** → VDD (28), 10 µF ;
-  - VBUS (32) : 10 µF, et D+/D− (35/34) en pads pour le bootloader UF2 et le debug. Pas de charge par USB pour l'instant (à revoir avec le choix de la batterie).
+  - VBUS (32) et D+/D− (35/34) : USB-C sur la carte de prototype ; supprimés sur la version compacte (flash par SWD puis OTA BLE).
 - **VDD = REGOUT0 réglé à 3,0 V** (registre UICR) plutôt que 3,3 V : le régulateur reste en régulation jusqu'à une batterie à ~3,3 V (le seuil d'arrêt du firmware), et le MS5611 accepte 1,8–3,6 V. À prévoir dans la définition de carte et le bootloader (la valeur par défaut est 1,8 V).
 - **Quartz 32,768 kHz** (optionnel selon Raytac) : **retenu**. Il évite l'oscillateur RC, qui se recalibre périodiquement et impose des fenêtres de réception BLE plus larges (500 ppm), donc plus de temps radio.
 - Mesure de la batterie : canal **VDDHDIV5** interne du SAADC → pas de pont diviseur externe (trame `$LK8EX1` + service Battery).
@@ -169,7 +209,7 @@ Principe : les cellules débitent dans VCC (la charge système). Le LTC4071 dér
   - Cellules conservées : **2 × PowerFilm SP3-12** (silicium amorphe souple, 12,7 × 64 mm), côte à côte sur le dessus du casque. Par cellule, en plein soleil : Vmp 3,0 V / Imp 8,5 mA (~25 mW), Voc 4,5 V, Isc 10,7 mA.
   - Bilan grossier : 50 mW en plein soleil, ~5–15 mW réalistes sur le casque → ~1–3 mA de charge, contre 0,3–1 mA consommés en vol.
   - Option écartée : récupérateur MPPT (TI BQ25505, e-peas AEM10941) avec les cellules en parallèle. Il ne vaut le coup que si les cellules sont souvent ombrées différemment. L'AEM10941 est de toute façon limité à un Voc de 5,0 V, trop juste pour 2 SP3-12 en parallèle par temps froid.
-- **Batterie** : petite LiPo souple 40–100 mAh au lieu de la LIR2016 (~20 mAh). Choix reporté.
+- **Batterie** (vario casque) : petite LiPo souple 40–100 mAh au lieu de la LIR2016 (~20 mAh), hors carte, reliée aux pastilles BT1. Modèle à choisir.
 - **Capteur** : **MS5611 retenu** (connu, même algorithme que la v1). Levier conso : OSR et fréquence d'échantillonnage. BMP581 écarté pour l'instant. Accéléromètre en option (fusion Kalman), coûteux en conso.
 - **PCB souple** : raidisseurs sous module/capteur ; capteur protégé du vent (mousse) ; antenne orientée vers l'extérieur, zone dégagée respectée.
 
@@ -201,8 +241,11 @@ Pas indispensable, mais fortement recommandé. Un multimètre lisse mal les pics
 
 ## Plan
 1. ~~**Prototype** : Feather nRF52840 + carte capteur, PlatformIO/Adafruit, liaison XCTrack~~ (fait) ; LK8000 et mesures au PPK2 à venir.
-2. **Extension** :
+2. **Vario casque** :
+   - carte de prototype `pcb/kicad/varioSmooth_v2` routée (avec USB-C), à fabriquer et valider ;
+   - test du buzzer CMS ;
+   - version compacte sans USB, flash SWD puis OTA BLE.
+3. **Extension** :
    - logger IGC prototypé sur la Feather (flash QSPI intégrée + carte d'évaluation MAX-M10S) ;
-   - schéma KiCad (`pcb/kicad/varioSmooth_v2`, base déjà dessinée) complété du GNSS et de la flash ;
+   - nouveau schéma : 18650 + BQ25895, GNSS, flash, écran, 3 boutons ;
    - boîtier pour le cockpit, PCB rigide.
-3. **Vario casque** : petit boîtier sur une sangle, firmware commun.
