@@ -22,7 +22,7 @@ La v1 marche, mais elle est pénible à installer : les fils passés par l'aéra
 | Interface | Un bouton | Boutons **+ / − / push**, petit écran, menu |
 
 ### Vario casque
-- **Pas de connecteur USB** (il serait inaccessible) : J1, U1 (protection ESD), R3 et R4 disparaissent, la carte rétrécit (~20 × 22 mm avec le MDBT50Q, ~15 × 18 mm avec un ISP1807 ; estimations sans placement).
+- **Pas de connecteur USB** (il serait inaccessible) : J1, U1 (protection ESD), R2, R3, R4, D2 et C4 disparaissent. Carte routée avec le MDBT50Q : **20 × 25,25 mm** (~15 × 18 mm estimés avec un ISP1807).
 - **Module : à trancher** entre le MDBT50Q et l'**Insight SiP ISP1807** (même nRF52840, donc même firmware) :
 
   | | MDBT50Q-1MV2 | ISP1807 |
@@ -35,10 +35,12 @@ La v1 marche, mais elle est pénible à installer : les fils passés par l'aéra
   | Carte Adafruit | Définition Feather nRF52840 utilisable telle quelle | Pas de variante : définition de carte à adapter |
 
   Dans les deux cas, l'antenne doit être au bord de la carte, avec une zone sans cuivre.
-- **Flash** : bootloader Adafruit flashé une fois par SWD (sonde CMSIS-DAP), puis mises à jour en **OTA BLE** (nRF Connect ou Bluefruit). Le bouton reste sur **P1.02** : maintenu à la mise sous tension, il lance le bootloader en mode DFU, ce qui permet de récupérer un firmware planté sans ouvrir le casque. Pastilles SWD conservées.
+- **Flash** : bootloader Adafruit flashé une fois par SWD (sonde CMSIS-DAP), puis mises à jour en **OTA BLE** (nRF Connect ou Bluefruit). Le bouton reste sur **P1.02** : maintenu à la mise sous tension, il lance le bootloader en mode DFU, ce qui permet de récupérer un firmware planté sans ouvrir le casque.
+- **Pastilles de test** au dos (Ø 1,5 mm, pas de 2,54 mm, pour pogo pins) : 3V3, GND, RESET, SWDIO, SWDCLK.
+- **Reset sans bouton** : la batterie est soudée, on ne peut pas la débrancher pour relancer le nRF. Les pastilles RESET et GND sont voisines : les toucher ensemble avec une pince fait un reset. Un bouton, même petit, dépasserait et risquerait des resets intempestifs dans la doublure. Reset avec P1.02 maintenu (ou double reset) → DFU, pour reflasher une appli plantée ou une OTA ratée. Un bootloader corrompu ne se répare que par SWD.
 - **Buzzer sur la carte** : à tester avant de l'adopter. Un piézo CMS (~9 × 9 mm, résonance ~4 kHz) est bien plus faible qu'un KPEG006 aux fréquences du vario (400–1500 Hz) ; il ne convient que si la carte est près de l'oreille. Essai : Feather + piézo CMS contre KPEG006, casque sur la tête, avec un ventilateur.
 - **Fils vers les cellules** : point faible de la v1, prévoir un passage propre et un serre-câble collé sur la carte.
-- La carte routée actuelle (avec USB-C, 20 × 32,75 mm) sert de **prototype de développement** : alimentation, capteur, audio, OTA et consommation, avant la version compacte.
+- La version avec USB-C (20 × 32,75 mm, commit `d064723`) reste disponible dans l'historique git comme **prototype de développement**.
 
 ### Extension : batterie externe, vario et logger
 - **Batterie** : 18650 en **1S** (1 ou 2 cellules en parallèle, ~3000–3500 mAh chacune) : pas d'équilibrage, chargeurs et élévateurs courants. 2 cellules : ~37 × 65 × 19 mm, ~95 g. Cellules de marque (Samsung 35E, Molicel, LG).
@@ -120,11 +122,14 @@ Trame retenue : **`$LK8EX1,<pression Pa>,99999,<vario cm/s>,<température °C>,<
 ## Firmware (`firmware/`)
 Projet PlatformIO, environnement `feather_nrf52840` : `pio run -t upload`, puis `pio device monitor` (sortie de debug sur l'USB).
 
+Sortie de debug choisie à la compilation par `DEBUG_OUTPUT` (`src/debug_out.h`) : 0 = aucune (mesures de consommation, vol), 1 = USB, 2 = **SEGGER RTT** par le SWD (carte casque sans USB). L'environnement `rtt` compile avec RTT ; lecture avec une sonde CMSIS-DAP : `probe-rs attach --chip nRF52840_xxAA .pio/build/rtt/firmware.elf`. Le tampon RTT ne bloque pas : sans sonde, les messages en trop sont perdus et le firmware continue. Une sonde branchée consomme ~1 mA.
+
 | Fichier | Rôle |
 |---|---|
 | `src/ms5611.*` | Pilote du capteur : PROM + CRC4, compensation de température du 2e ordre (absentes en v1). Pression en OSR 4096, température en OSR 1024 (512 en v1). |
 | `src/vario.*` | Algorithme de la v1 : filtre passe-bas d'ordre 2 sur la pression, dérivée sur une fenêtre de 10 à 50 échantillons selon la vitesse, filtre IIR sur la vitesse. Calcul en flottant et sur l'altitude (cm/s) plutôt que sur la pression. |
 | `src/ble_link.*` | Nordic UART + trames `$LK8EX1`. |
+| `src/debug_out.*` | Sortie de debug `dbg` (USB ou RTT), voir `DEBUG_OUTPUT`. |
 | `src/audio.*` | Bips de la v1 (tables `beepLen` / `audioFreq`, ton à 2/3, silence en descente) et mélodies (démarrage, volume, arrêt). 3 volumes comme en v1 : boost = deux broches en opposition de phase (le comparateur de la v1 fournissait le signal inversé), high = une seule broche, medium = une 3ᵉ broche à travers une résistance (le potentiomètre numérique de la v1). Réduire le rapport cyclique ne marche pas : le son vient surtout des harmoniques, et chaque front fait sonner le piézo pareil ; il faut arrondir les fronts (RC avec la capacité du piézo). |
 | `src/button.*` | Bouton scruté à chaque échantillon (anti-rebond par la période de 20 ms). Appui court : volume suivant (enregistré en flash à l'extinction seulement : une écriture bloque ~0,5 s, le capteur refroidit pendant la pause et le vario voit une fausse montée). Appui long (> 0,5 s) : arrêt en System OFF, le bouton rallume la carte. |
 | `src/main.cpp` | Boucle à 50 Hz, même séquence que la v1 : lecture de la pression, conversion courte de la température, lancement de la pression suivante. Trame BLE à 10 Hz. La température doit être fraîche à chaque échantillon : la pression brute dérive d'environ 2 mbar/°C (coefficients typiques), et une température en retard se voit comme une fausse vitesse verticale. |
@@ -192,7 +197,8 @@ Principe : les cellules débitent dans VCC (la charge système). Le LTC4071 dér
 - Schéma de référence « Reg0 DC/DC Enabled » (VDDH ≥ 3,6 V) :
   - VDDH (broche 30) ← VCC du LTC4071, 10 µF (VDDH accepte 2,5–5,5 V, VCC ne dépasse pas 4,1 V) ;
   - DCCH (31) → **L 10 µH 0603 (≥ 80 mA)** → VDD (28), 10 µF ;
-  - VBUS (32) et D+/D− (35/34) : USB-C sur la carte de prototype ; supprimés sur la version compacte (flash par SWD puis OTA BLE).
+  - VBUS (32) relié à GND, D+/D− (35/34) non connectés : pas d'USB (flash par SWD puis OTA BLE).
+  - P0.18 en broche de reset (pastille RESET), configuré par le bootloader Adafruit.
 - **VDD = REGOUT0 réglé à 3,0 V** (registre UICR) plutôt que 3,3 V : le régulateur reste en régulation jusqu'à une batterie à ~3,3 V (le seuil d'arrêt du firmware), et le MS5611 accepte 1,8–3,6 V. À prévoir dans la définition de carte et le bootloader (la valeur par défaut est 1,8 V).
 - **Quartz 32,768 kHz** (optionnel selon Raytac) : **retenu**. Il évite l'oscillateur RC, qui se recalibre périodiquement et impose des fenêtres de réception BLE plus larges (500 ppm), donc plus de temps radio.
 - Mesure de la batterie : canal **VDDHDIV5** interne du SAADC → pas de pont diviseur externe (trame `$LK8EX1` + service Battery).
@@ -242,9 +248,8 @@ Pas indispensable, mais fortement recommandé. Un multimètre lisse mal les pics
 ## Plan
 1. ~~**Prototype** : Feather nRF52840 + carte capteur, PlatformIO/Adafruit, liaison XCTrack~~ (fait) ; LK8000 et mesures au PPK2 à venir.
 2. **Vario casque** :
-   - carte de prototype `pcb/kicad/varioSmooth_v2` routée (avec USB-C), à fabriquer et valider ;
-   - test du buzzer CMS ;
-   - version compacte sans USB, flash SWD puis OTA BLE.
+   - carte compacte `pcb/kicad/varioSmooth_v2` routée (sans USB, 20 × 25,25 mm), à fabriquer et valider : flash SWD, puis OTA BLE ;
+   - test du buzzer CMS.
 3. **Extension** :
    - logger IGC prototypé sur la Feather (flash QSPI intégrée + carte d'évaluation MAX-M10S) ;
    - nouveau schéma : 18650 + BQ25895, GNSS, flash, écran, 3 boutons ;

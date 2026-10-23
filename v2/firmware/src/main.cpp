@@ -20,12 +20,9 @@
 #include "audio.h"
 #include "ble_link.h"
 #include "button.h"
+#include "debug_out.h"
 #include "ms5611.h"
 #include "vario.h"
-
-#ifndef DEBUG_SERIAL
-#define DEBUG_SERIAL 0
-#endif
 
 using namespace Adafruit_LittleFS_Namespace;
 
@@ -135,9 +132,9 @@ void playAndWait(const Audio::Note *melody) {
         delay(10);
     }
     delay(50);      // release bounces
-    if (DEBUG_SERIAL) {
-        Serial.println("Power off");
-        Serial.flush();
+    if (DEBUG_ENABLED) {
+        dbg.println("Power off");
+        dbg.flush();
     }
     // The MS5611 goes idle by itself after its conversion (< 0.15 uA)
     systemOff(BUTTON_PIN, LOW);
@@ -148,8 +145,8 @@ void playAndWait(const Audio::Note *melody) {
 
 [[noreturn]] void fail(const char *msg) {
     while (true) {
-        if (DEBUG_SERIAL) {
-            Serial.println(msg);
+        if (DEBUG_ENABLED) {
+            dbg.println(msg);
         }
         digitalWrite(LED_RED, !digitalRead(LED_RED));
         delay(250);
@@ -161,8 +158,8 @@ void handleButton() {
     case Button::SHORT_PRESS:
         audio.nextVolume();
         audio.play(Audio::VOLUME_CHANGE);   // heard at the new volume
-        if (DEBUG_SERIAL) {
-            Serial.printf("Volume %d\n", audio.volume());
+        if (DEBUG_ENABLED) {
+            dbg.printf("Volume %d\n", audio.volume());
         }
         break;
     case Button::LONG_PRESS:
@@ -188,11 +185,11 @@ bool processSample() {
     if (warmupCountdown > 0) {
         if (--warmupCountdown == 0) {
             vario.begin(p);
-            if (DEBUG_SERIAL) {
-                Serial.printf("VarioSmooth v2 ready %lu ms after reset: MS5611 at 0x%02X, "
-                              "%ld Pa, %.2f C, volume %d\n",
-                              (unsigned long)millis(), baro.address(), (long)p,
-                              baro.temperature() / 100.0, audio.volume());
+            if (DEBUG_ENABLED) {
+                dbg.printf("VarioSmooth v2 ready %lu ms after reset: MS5611 at 0x%02X, "
+                           "%ld Pa, %.2f C, volume %d\n",
+                           (unsigned long)millis(), baro.address(), (long)p,
+                           baro.temperature() / 100.0, audio.volume());
             }
         }
         return false;   // nothing sent while warming up
@@ -213,16 +210,16 @@ bool processSample() {
                             BleLink::BATTERY_UNKNOWN);
     }
 
-    if (DEBUG_SERIAL && debugCountdown-- == 0) {
+    if (DEBUG_ENABLED && debugCountdown-- == 0) {
         debugCountdown = DEBUG_EVERY - 1;
         // Average rate since the end of the warm-up
         uint32_t elapsedMs = millis() - statStartMs;
         float rate = elapsedMs ? (statSamples - 1) * 1000.0f / elapsedMs : 0;
-        Serial.printf("p=%ld Pa  alt=%.1f m  climb=%.0f cm/s  idx=%d  T=%.2f C  ble=%d  "
-                      "rate=%.2f Hz late=%lu skipped=%lu\n",
-                      (long)p, vario.altitude(), vario.climb(), vario.speedIndex(),
-                      baro.temperature() / 100.0, BleLink::connected(), rate,
-                      (unsigned long)statLate, (unsigned long)statSkipped);
+        dbg.printf("p=%ld Pa  alt=%.1f m  climb=%.0f cm/s  idx=%d  T=%.2f C  ble=%d  "
+                   "rate=%.2f Hz late=%lu skipped=%lu\n",
+                   (long)p, vario.altitude(), vario.climb(), vario.speedIndex(),
+                   baro.temperature() / 100.0, BleLink::connected(), rate,
+                   (unsigned long)statLate, (unsigned long)statSkipped);
     }
     return true;
 }
@@ -231,11 +228,7 @@ bool processSample() {
 void setup() {
     pinMode(LED_RED, OUTPUT);
     button.begin(BUTTON_PIN);
-    if (DEBUG_SERIAL) {
-        // No wait for the USB serial (re-enumerated at every wake-up): the
-        // start-up info is printed at the end of the warm-up
-        Serial.begin(115200);
-    }
+    debugBegin();
 
     InternalFS.begin();
     if (!audio.begin(BUZZER_PIN_A, BUZZER_PIN_B, BUZZER_PIN_WEAK)) {
